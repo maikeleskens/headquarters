@@ -1,0 +1,153 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<style type="text/css">
+		#mapDiv {
+			width:600px;
+			height:700px;
+		}
+	</style>
+<script type="text/javascript">
+
+	if ( !window.requestAnimationFrame ) {
+		window.requestAnimationFrame = ( function() {
+			return window.webkitRequestAnimationFrame ||
+			window.mozRequestAnimationFrame ||
+			window.oRequestAnimationFrame ||
+			window.msRequestAnimationFrame ||
+			function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+				window.setTimeout( callback, 1000 / 60 );
+			};
+		} )();
+	}
+	var xpos = 0;
+	var ypos =0;
+	var ctx;
+	var c;
+
+	
+
+	window.onload = function(){
+	$('#drawCanvas').focus()
+		ctx = drawCanvas.getContext("2d");
+		c=document.getElementById("drawCanvas");
+		ctx=c.getContext("2d");
+
+		ctx.fillStyle="#BEBEBE";
+		
+	//ctx.fillRect(xpos,ypos,10,10);
+		init();
+		
+	}
+
+	function init(){
+
+		update();
+	}
+
+	var socket = io.connect();
+	var app = {
+
+	}
+
+	
+
+	socket.on('dataClient', function(data){
+		var mouseX = parseInt(data.mouseX);
+		var mouseY = parseInt(data.mouseY);
+
+		console.log(mouseX+ ", "+ mouseY);
+		xpos = mouseX;
+		ypos = mouseY;
+
+		clearCanvas();
+		updatePosition();
+	})
+
+/*
+	function map (var value:float, var low1:float, var high1:float, var low2:float, var high2:float){
+		low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+	}
+	*/
+
+
+	function updatePosition(){
+
+		ctx.fillRect(xpos,ypos,10,10);
+	}
+	function clearCanvas() {
+		var canvasWidth = drawCanvas.width;
+		var canvasHeight = drawCanvas.height;
+    	ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+	}
+
+	function update(){
+		requestAnimationFrame(update);
+		
+	}
+	
+
+	</script>
+</head>
+
+<body>
+
+<canvas id="drawCanvas" width="500" height="500"></canvas>
+
+<script type="text/javascript">
+	//get a reference to the canvas
+	
+/*
+	$('#myCanvas').focus()
+
+var context = myCanvas.getContext("2d");
+context.fillRect(100, 100, 50, 30);
+
+var canvasWidth = myCanvas.width;
+var canvasHeight = myCanvas.height;
+
+var x = 100;
+var y = 100;
+
+function doKeyDown(e) {     
+    switch(e.keyCode) {
+        case 87:
+        case 38:
+            y = y -10;
+            clearCanvas();
+            context.fillRect(x, y, 50, 30);
+            console.log('W pressed');
+            break;
+        case 83:
+        case 40:
+            y = y + 10;
+            clearCanvas();
+            context.fillRect(x, y, 50, 30); 
+            console.log('S pressed');
+            break;
+        case 65:
+        case 37:
+            x = x - 10;
+            clearCanvas();
+            context.fillRect(x, y, 50, 30);
+            console.log('A pressed');
+            break;
+        case 68:
+        case 39:
+            x = x + 10;
+            clearCanvas();
+            context.fillRect(x, y, 50, 30); 
+            console.log('D pressed');    
+            break;
+    }
+}
+
+function clearCanvas() {
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+}
+*/
+</script>
+HELLO WORLD
+</body>
+</html>
