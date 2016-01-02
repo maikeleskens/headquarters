@@ -10,8 +10,20 @@ app.get('/', function(req, res){
   res.sendfile('index.html');
 });
 
+app.get('/game', function(req, res){
+	res.sendfile('views/pages/game.html');
+});
+
+app.get('/play', function(req, res){
+	res.sendfile('views/pages/play.html');
+});
 
 
+var devices =[];
+for (var i=0; i<9; i++){
+	devices.push(0);
+}
+var connectedDevices=0;
 // views is directory for all template files
 //app.set('views', __dirname + '/views');
 //app.set('view engine', 'ejs');
@@ -21,16 +33,43 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
 	socket.on("requestID", function(data){
 		console.log(data.playerName);
-		var id=1;
+		connectedDevices++;
+		devices.push(connectedDevices);
+
+		var i = 0;
+		while(i==devices[i]){
+			i++;
+		}
+		devices[i] = i;
+		var id = devices[i];
+		//var id=1;
+
 		//socket.emit("receiveID", id);
 		//STORE THE PLAYER NAME IN  AN ARRAY
 		socket.emit("receiveID", {id_num: id});
+
+		console.log( devices[0] + ", " + devices[1] + ", " +
+			devices[2] + ", " + devices[3] + ", " +
+			devices[4] + ", " + devices[5] + ", " +
+			devices[6] + ", " + devices[7] + ", " +
+			devices[8]
+		);
 	})
 
 	socket.on("dataTransfer", function(data){
 		console.log(data);
 		io.sockets.emit("dataClient",data);
-	});
+	})
+
+	socket.on("pressedStart", function(data){
+        console.log(data);
+    })
+
+    socket.on('userDisconnected', function(data){
+    	console.log("user "+ data.remove_id + "left");
+    	var remove_id = parseInt(data.remove_id);
+    	devices[remove_id] =0;
+    })
 });
 
 

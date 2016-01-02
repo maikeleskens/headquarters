@@ -1,0 +1,83 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+
+	if ( !window.requestAnimationFrame ) {
+		window.requestAnimationFrame = ( function() {
+			return window.webkitRequestAnimationFrame ||
+			window.mozRequestAnimationFrame ||
+			window.oRequestAnimationFrame ||
+			window.msRequestAnimationFrame ||
+			function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+				window.setTimeout( callback, 1000 / 60 );
+			};
+		} )();
+	}
+
+	var socket = io.connect();
+	var currentID;
+
+	var xpos = 0;
+	var ypos = 0;
+
+	window.onload = function(){
+		socket.emit("requestID", {playerName: "maikel"});
+	}
+
+	socket.on("receiveID", function(data){
+		console.log("received id: " + data.id_num);
+		document.getElementById("myID").innerHTML= data.id_num;
+		currentID = data.id_num;
+
+
+	});
+
+	function moveUp(){
+		ypos= ypos -10;
+		sendData();
+	}
+
+	function moveDown(){
+		ypos = ypos+10;
+		sendData();
+	}
+	function moveLeft(){
+		xpos = xpos-10;
+		sendData();
+	}
+	function moveRight(){
+		xpos = xpos +10;
+		sendData();
+	}
+
+	function sendData(){
+		socket.emit("dataTransfer", {
+			id_num:currentID,
+			mouseX:xpos,
+			mouseY:ypos
+		});
+		console.log("sendtest");
+	}
+	
+	window.onbeforeunload = closingCode;
+	function closingCode(){
+		socket.emit("userDisconnected", {remove_id : currentID});
+   		return null;
+	}
+
+	</script>
+</head>
+
+<body>
+<span id="myID"> No ID received </span>
+
+<button onClick="moveUp()">Up </button>
+<button onClick="moveDown()">Down </button>
+<button onClick="moveLeft()">Left </button>
+<button onClick="moveRight()">Right </button>
+
+
+</body>
+</html>
