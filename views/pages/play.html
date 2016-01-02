@@ -30,9 +30,17 @@
 		console.log("received id: " + data.id_num);
 		document.getElementById("myID").innerHTML= data.id_num;
 		currentID = data.id_num;
-
-
 	});
+
+
+	socket.on("removeMe", function(data){
+		var _id = parseInt(data.id);
+		console.log(_id);
+		if (_id == currentID){
+			socket.emit("userDisconnected", {remove_id : currentID});
+			window.location.href = "/afk";
+		}
+	})
 
 	function moveUp(){
 		ypos= -10;

@@ -18,15 +18,24 @@ app.get('/play', function(req, res){
 	res.sendfile('views/pages/play.html');
 });
 
+app.get('/afk', function(req, res){
+	res.sendfile('views/pages/afk.html');
+})
+
 var xpositions =[];
+var prev_xpositions = [];
 var ypositions = [];
+var prev_ypositions = [];
+
 var devices =[];
 
 
 for (var i=0; i<9; i++){
 	devices.push(0);
 	xpositions.push(0);
+	prev_xpositions.push(0);
 	ypositions.push(0);
+	prev_ypositions.push(0);
 }
 
 
@@ -34,8 +43,22 @@ var connectedDevices=0;
 // views is directory for all template files
 //app.set('views', __dirname + '/views');
 //app.set('view engine', 'ejs');
+checkIfAfk();
+function checkIfAfk(){
+	setTimeout(function(){
+		for (var i = 0; i<9; i++){
+			if(xpositions[i] == prev_xpositions[i] &&
+				ypositions[i] == prev_ypositions[i] && devices[i] !=0){
+				console.log("user " + i + " needs to be removed");
+				io.sockets.emit("removeMe", {id:i});
+			}
+			prev_xpositions[i] = xpositions[i];
+			prev_ypositions[i] = ypositions[i];
+		}
 
-
+		checkIfAfk();
+	},5000);
+}
 
 io.on('connection', function(socket){
 	socket.on("requestID", function(data){
@@ -63,13 +86,16 @@ io.on('connection', function(socket){
 		);
 	})
 
+	socket.on("imOnline", function(data){
+		var id = parseInt(data.id);
+		console.log(data);
+	})
+
 	socket.on("dataTransfer", function(data){
 		
 		var id = parseInt(data.id_num);
 		var xmove = parseInt(data.x);
 		var ymove = parseInt(data.y);
-
-
 
 		xpositions[id] = xpositions[id] +xmove;
 		ypositions[id] = ypositions[id] +ymove;
@@ -80,6 +106,7 @@ io.on('connection', function(socket){
 			x : xpositions[id],
 			y : ypositions[id]
 		})
+
 		//io.sockets.emit("dataClient",data);
 	})
 
