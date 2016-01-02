@@ -35,30 +35,32 @@
 	});
 
 	function moveUp(){
-		ypos= ypos -10;
+		ypos= -10;
 		sendData();
 	}
 
 	function moveDown(){
-		ypos = ypos+10;
+		ypos = 10;
 		sendData();
 	}
 	function moveLeft(){
-		xpos = xpos-10;
+		xpos = -10;
 		sendData();
 	}
 	function moveRight(){
-		xpos = xpos +10;
+		xpos=10;
 		sendData();
 	}
 
 	function sendData(){
 		socket.emit("dataTransfer", {
-			id_num:currentID,
-			mouseX:xpos,
-			mouseY:ypos
+			id_num : currentID,
+			x : xpos,
+			y : ypos
 		});
 		console.log("sendtest");
+		ypos= 0;
+		xpos=0;
 	}
 	
 	window.onbeforeunload = closingCode;

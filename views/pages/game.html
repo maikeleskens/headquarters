@@ -33,8 +33,8 @@
 		ctx = drawCanvas.getContext("2d");
 		c=document.getElementById("drawCanvas");
 		ctx=c.getContext("2d");
-		ctx.canvas.width = window.innerWidth;
-		ctx.canvas.height = window.innerHeight;
+		ctx.canvas.width = 500;
+		ctx.canvas.height = 500;
 
 		ctx.fillStyle="#BEBEBE";
 		updatePosition();
@@ -61,8 +61,10 @@
 	socket.on('dataClient', function(data){
 		var id = parseInt(data.id_num);
 
-		var posX = relativeToScreen(parseFloat(data.mouseX), ctx.canvas.width);
-		var posY = relativeToScreen(parseFloat(data.mouseY), ctx.canvas.height);
+		var posX = parseFloat(data.x);
+		var posY = parseFloat(data.y);
+		//var posX = relativeToScreen(parseFloat(data.x), ctx.canvas.width);
+		//var posY = relativeToScreen(parseFloat(data.y), ctx.canvas.height);
 
 		xpositions[id] = posX;
 		ypositions[id] = posY;

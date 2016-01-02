@@ -18,11 +18,18 @@ app.get('/play', function(req, res){
 	res.sendfile('views/pages/play.html');
 });
 
-
+var xpositions =[];
+var ypositions = [];
 var devices =[];
+
+
 for (var i=0; i<9; i++){
 	devices.push(0);
+	xpositions.push(0);
+	ypositions.push(0);
 }
+
+
 var connectedDevices=0;
 // views is directory for all template files
 //app.set('views', __dirname + '/views');
@@ -57,9 +64,26 @@ io.on('connection', function(socket){
 	})
 
 	socket.on("dataTransfer", function(data){
-		console.log(data);
-		io.sockets.emit("dataClient",data);
+		
+		var id = parseInt(data.id_num);
+		var xmove = parseInt(data.x);
+		var ymove = parseInt(data.y);
+
+
+
+		xpositions[id] = xpositions[id] +xmove;
+		ypositions[id] = ypositions[id] +ymove;
+
+		console.log("x: "+ xpositions[id] + ", y: " +ypositions[id]);
+		io.sockets.emit("dataClient", {
+			id_num : id,
+			x : xpositions[id],
+			y : ypositions[id]
+		})
+		//io.sockets.emit("dataClient",data);
 	})
+
+
 
 	socket.on("pressedStart", function(data){
         console.log(data);
@@ -69,6 +93,8 @@ io.on('connection', function(socket){
     	console.log("user "+ data.remove_id + "left");
     	var remove_id = parseInt(data.remove_id);
     	devices[remove_id] =0;
+    	xpositions[remove_id] = 0;
+    	ypositions[remove_id] = 0;
     })
 });
 
