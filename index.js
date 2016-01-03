@@ -26,8 +26,9 @@ var xpositions =[];
 var prev_xpositions = [];
 var ypositions = [];
 var prev_ypositions = [];
-
 var devices =[];
+
+var speedMultiplier = 4;
 
 
 for (var i=0; i<9; i++){
@@ -57,7 +58,7 @@ function checkIfAfk(){
 		}
 
 		checkIfAfk();
-	},5000);
+	},15000);
 }
 
 io.on('connection', function(socket){
@@ -94,8 +95,8 @@ io.on('connection', function(socket){
 	socket.on("dataTransfer", function(data){
 		
 		var id = parseInt(data.id_num);
-		var xmove = parseInt(data.x);
-		var ymove = parseInt(data.y);
+		var xmove = parseFloat(data.x) * speedMultiplier;
+		var ymove = parseFloat(data.y) * speedMultiplier;
 
 		xpositions[id] = xpositions[id] +xmove;
 		ypositions[id] = ypositions[id] +ymove;
@@ -117,7 +118,7 @@ io.on('connection', function(socket){
     })
 
     socket.on('userDisconnected', function(data){
-    	console.log("user "+ data.remove_id + "left");
+    	console.log("user "+ data.remove_id + " left");
     	var remove_id = parseInt(data.remove_id);
     	devices[remove_id] =0;
     	xpositions[remove_id] = 0;
