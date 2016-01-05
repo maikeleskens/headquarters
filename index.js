@@ -28,7 +28,7 @@ var ypositions = [];
 var prev_ypositions = [];
 var devices =[];
 
-var speedMultiplier = 4;
+var speedMultiplier = 8;
 
 
 for (var i=0; i<9; i++){
@@ -52,6 +52,9 @@ function checkIfAfk(){
 				ypositions[i] == prev_ypositions[i] && devices[i] !=0){
 				console.log("user " + i + " needs to be removed");
 				io.sockets.emit("removeMe", {id:i});
+				//Add code to delete user and open device id serverside,
+				//instead of waiting for a response from client.
+				//device id is still taken when a user opens another app, goes to home screen or screen goes black
 			}
 			prev_xpositions[i] = xpositions[i];
 			prev_ypositions[i] = ypositions[i];
@@ -125,6 +128,7 @@ io.on('connection', function(socket){
     	ypositions[remove_id] = 0;
     })
 });
+
 
 
 var port = process.env.PORT || 5000;

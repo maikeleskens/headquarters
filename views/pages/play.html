@@ -97,46 +97,13 @@
 <head>
 	<meta charset=utf-8>
 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0" /> 
-	<title></title>
+	<title>Play</title>
 	<script src="/js/Vector2.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-	<style type="text/css"> 
-	
-	* {
-		-webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
-		-webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
-		/* make transparent link selection, adjust last value opacity 0 to 1.0 */
-		-webkit-tap-highlight-color: rgba(0,0,0,0); 
-		-webkit-user-select: none; /* prevent copy paste, to allow, change 'none' to 'text' */
-		-webkit-tap-highlight-color: rgba(0,0,0,0); 
-	}
-	
-	body {
-		background-color: #000000;
-		margin: 0px;
-	}
-	canvas {
-		background-color:#111133;
-		display:block; 
-		position:absolute; 
-	}
-	.container {
-		width:auto;
-		text-align:center;
-		background-color:#ff0000;
-	}
 
-	.box{
-		width: 600px;
-		height:150px;
-		background-color: #ffffff;
-		color: #000000;
-		font-size: 24px;
-		z-index: 999;
-		position: fixed;
-	}
-	</style>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/play.css">
+
 
 
 </head>
@@ -146,9 +113,9 @@
 	<!--TEMP  DATA -->
 	<div class="box">
 		<span id="myID">No ID yet</span>
-		<span id="showpositions"> No positions yet</span>
 	</div>
-
+	<div id="movementBox"></div>
+	<div id="boostButton"></div>
 
 
 
@@ -173,6 +140,8 @@
 
 	window.onload = function(){
 		socket.emit("requestID", {playerName: "maikel"});
+		//start with a random position so people dont spawn in the same location with socket emit
+		//also prevents from being afk when the afk timer ended.
 	}
 
 	socket.on("receiveID", function(data){
@@ -186,7 +155,6 @@
 		var _id = parseInt(data.id);
 		console.log(_id);
 		if (_id == currentID){
-			socket.emit("userDisconnected", {remove_id : currentID});
 			window.location.href = "/afk";
 		}
 	})
@@ -267,20 +235,29 @@ function draw() {
 			var touch = touches[i]; 
 			
 			if(touch.identifier == leftTouchID){
+				//Show data on touch
+				c.beginPath();
+				c.fillStyle = "#ffffff";
+				c.fillText("touch id : "+touch.identifier+" x:"+touch.clientX+" y:"+touch.clientY, touch.clientX+30, touch.clientY-30);
+				//Innercircle
 				c.beginPath(); 
-				c.strokeStyle = "cyan"; 
-				c.lineWidth = 6; 
-				c.arc(leftTouchStartPos.x, leftTouchStartPos.y, 40,0,Math.PI*2,true); 
+				c.strokeStyle = "#bebebe"; 
+				c.lineWidth = 4; 
+				c.arc(leftTouchStartPos.x, leftTouchStartPos.y, 35,0,Math.PI*2,true); 
 				c.stroke();
-				c.beginPath(); 
-				c.strokeStyle = "cyan"; 
-				c.lineWidth = 2; 
-				c.arc(leftTouchStartPos.x, leftTouchStartPos.y, 60,0,Math.PI*2,true); 
+				//Line bewteen cricles
+				c.beginPath();
+				c.strokeStyle = "#bebebe"
+				c.lineWidth = 2;
+				c.moveTo(leftTouchStartPos.x,leftTouchStartPos.y);
+				c.lineTo(leftTouchPos.x,leftTouchPos.y);
 				c.stroke();
+				//Thumbstick Circle
 				c.beginPath(); 
-				c.strokeStyle = "cyan"; 
+				c.fillStyle = "#ffffff"; 
 				c.arc(leftTouchPos.x, leftTouchPos.y, 40, 0,Math.PI*2, true); 
-				c.stroke(); 
+				c.fill();
+				
 
 				newX = MinMax(parseInt(leftTouchPos.x) - parseInt(leftTouchStartPos.x), -maxDragRange, maxDragRange)/maxDragRange; 
 				newY = MinMax(parseInt(leftTouchPos.y) - parseInt(leftTouchStartPos.y), -maxDragRange, maxDragRange)/maxDragRange;
