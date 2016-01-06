@@ -14,6 +14,10 @@ app.get('/game', function(req, res){
 	res.sendfile('views/pages/game.html');
 });
 
+app.get('/join', function(req, res){
+	res.sendfile('views/pages/join.html');
+});
+
 app.get('/play', function(req, res){
 	res.sendfile('views/pages/play.html');
 });
@@ -27,10 +31,12 @@ var prev_xpositions = [];
 var ypositions = [];
 var prev_ypositions = [];
 var devices =[];
+var playerNames = [];
 var maxUsers = 9;
 
-var standardSpeedMultiplier = 8;
+var standardSpeedMultiplier = 12;
 var speedMultipliers = [];
+var boostSpeed = 80;
 
 
 for (var i=0; i<maxUsers; i++){
@@ -62,22 +68,36 @@ io.on('connection', function(socket){
 		}
 		devices[i] = i;
 		var id = devices[i];
+		playerNames[id] = data.playerName;
+		xpositions[id] = parseFloat(data.startX);
+		ypositions[id] = parseFloat(data.startY);
 		//var id=1;
 
 		//socket.emit("receiveID", id);
-		//STORE THE PLAYER NAME IN  AN ARRAY
+		
 		socket.emit("receiveID", {id_num: id});
+		//SEND THE PLAYER NAME 
 		io.sockets.emit("sendName", {
 			_id: id,
-			_playerName: data.playerName +id
+			_playerName: playerNames[id]
 		});
 
-		console.log( devices[0] + ", " + devices[1] + ", " +
-			devices[2] + ", " + devices[3] + ", " +
-			devices[4] + ", " + devices[5] + ", " +
-			devices[6] + ", " + devices[7] + ", " +
-			devices[8]
+		console.log(devices[1] + playerNames[1] + ", " +
+			devices[2] + playerNames[2] + ", " + devices[3] + playerNames[3] + ", " +
+			devices[4] + playerNames[4] + ", " + devices[5] + playerNames[5] + ", " +
+			devices[6] + playerNames[6] + ", " + devices[7] + playerNames[7] + ", " +
+			devices[8] + playerNames[8] 
 		);
+	})
+
+	socket.on("requestAllCurrentData", function(){
+		socket.emit("sendAllCurrentData", {
+			id_num : devices,
+			playerName: playerNames,
+			x : xpositions,
+			y : ypositions
+		});
+		console.log(playerNames);
 	})
 
 	socket.on("imOnline", function(data){
@@ -106,10 +126,10 @@ io.on('connection', function(socket){
 
 	socket.on("playerBoost", function(data){
 		console.log("player " + data.id + " boosted!");
-		speedMultipliers[parseInt(data.id)] = 60;
+		speedMultipliers[parseInt(data.id)] = boostSpeed;
 		setTimeout(function(){
 			speedMultipliers[parseInt(data.id)] = standardSpeedMultiplier;
-		},500)
+		},250)
 	})
 
 
@@ -123,6 +143,7 @@ io.on('connection', function(socket){
     	devices[remove_id] =0;
     	xpositions[remove_id] = 0;
     	ypositions[remove_id] = 0;
+    	playerNames[remove_id] = " ";
     	console.log("user "+ data.remove_id + " left");
     })
 });
@@ -138,6 +159,7 @@ function checkIfAfk(){
 				devices[i] =0;
     			xpositions[i] = 0;
     			ypositions[i] = 0;
+    			playerNames[i] = " ";
     			console.log("user "+ i + " kicked for afk");
 				//Add code to delete user and open device id serverside,
 				//instead of waiting for a response from client.
@@ -148,7 +170,7 @@ function checkIfAfk(){
 		}
 
 		checkIfAfk();
-	},15000);
+	},25000);
 }
 
 

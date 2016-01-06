@@ -31,9 +31,15 @@
 	var maxUsers = 12;
 	var easing = 0.075;
 
+	var receivedDataOnLaunch = false;
+for (var i = 0; i<maxUsers; i++){
+			xtargets[i] = 100.0;
+			ytargets[i] = 100.0;
+			xpositions[i] = 0.0;
+			ypositions[i] = 0.0;
+		}
 
 	window.onload = function(){
-
 		$('#drawCanvas').focus()
 			ctx = drawCanvas.getContext("2d");
 			c=document.getElementById("drawCanvas");
@@ -44,20 +50,12 @@
 			ctx.fillStyle="#ff0000";
 			
 	//ctx.fillRect(xpos,ypos,10,10);
-
 		init();
-		for (var i = 0; i<maxUsers; i++){
-			xtargets[i] = 0.0;
-			ytargets[i] = 0.0;
-			xpositions[i] = 0.0;
-			ypositions[i] = 0.0;
-		}
-		updatePosition();
 	}
 
 	function init(){
-		
 		update();
+		socket.emit("requestAllCurrentData");
 	}
 
 	var socket = io.connect();
@@ -65,9 +63,30 @@
 
 	}
 
+	socket.on("sendAllCurrentData", function(data){
+		//var id = parseInt(data.id);
+		for (var i = 0; i<maxUsers; i++){
+		xpositions[i] = parseFloat(data.x[i]);
+		ypositions[i] = parseFloat(data.y[i]);
+
+		xtargets[i] = parseFloat(data.x[i]);
+		ytargets[i] = parseFloat(data.y[i]);
+
+		names[i] = data.playerName[i];
+		
+
+		console.log(data.playerName[i]  + ", " + xpositions[i] + ", " + ypositions[i]);
+	}
+
+		
+
+		
+		//names[1] = "sikter";
+	})
+
 	socket.on('sendName', function(data){
-		console.log("wahed" + data._playerName);
 		names[parseInt(data._id)] = data._playerName;
+
 	})
 
 	socket.on('dataClient', function(data){
@@ -113,8 +132,10 @@
 				ypositions[i] = ypositions[i] +dy *easing;
 			}
 			//var test = xpositions[1] +dx *easing;
-			//xpositions[1] = xtargets[1];
-			//ypositions[1] = ytargets[1];
+			//xpositions[i] = xtargets[i];
+			//ypositions[i] = ytargets[i];
+			console.log(names[1]);
+
 			ctx.beginPath();
 			ctx.fillRect(xpositions[i],ypositions[i],10,10);
 			ctx.beginPath();
@@ -126,6 +147,7 @@
 	}
 
 	function update(){
+
 		//console.log("wahed");
 		updatePosition();
 		requestAnimationFrame(update);

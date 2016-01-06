@@ -112,7 +112,7 @@
 
 	<!--TEMP  DATA -->
 	<div class="box">
-		<span id="myID">No ID yet</span><br>
+		<span id="myID">No ID yet</span><span id="pname">No name</span><br>
 		<span id="test">No shit </span>
 	</div>
 	<div id="movementBox"></div>
@@ -136,6 +136,7 @@
 
 	var socket = io.connect();
 	var currentID = 0;
+	var playerName = "";
 	var newX = 0;
 	var newY = 0;
 
@@ -145,7 +146,20 @@
 	window.onload = function(){
 		buttonW = $("#boostButton").width();
 		buttonH = $("#boostButton").height();
-		socket.emit("requestID", {playerName: "maikel"});
+		var _n = localStorage.getItem('_n');
+		if (_n){
+			_n = JSON.parse(_n);
+		}
+		if (_n){
+			playerName = _n.playerName;
+			document.getElementById('pname').innerHTML = playerName;
+			console.log(playerName);
+		}
+		socket.emit("requestID", {
+			playerName: playerName,
+			startX: 100,
+			startY: 100
+		});
 		//start with a random position so people dont spawn in the same location with socket emit
 		//also prevents from being afk when the afk timer ended.
 	}
@@ -300,7 +314,7 @@ function draw() {
 	}
 	//c.fillText("hello", 0,0); 
 	timer++;
-		if (timer >5 && newX!=0 && newY !=0){
+		if (timer >2 && newX!=0 && newY !=0){
 			socket.emit("dataTransfer", {
 				id_num : currentID,
 				x : newX,

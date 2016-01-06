@@ -1,0 +1,33 @@
+<h1>Select your ingame name!</h1>
+<input type="text" id="nickname" onkeypress="return inputLimiter(event,'nickname')"size="20" maxlength="18" placeholder="Select your name" /><br>
+<button onClick ="startGame()">Play</button>
+
+<script type="text/javascript">
+
+function inputLimiter(e,allow) {
+    var AllowableCharacters = '';
+
+    if (allow == 'nickname'){AllowableCharacters=' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_\'';}
+
+    var k = document.all?parseInt(e.keyCode): parseInt(e.which);
+    if (k!=13 && k!=8 && k!=0){
+        if ((e.ctrlKey==false) && (e.altKey==false)) {
+    	    return (AllowableCharacters.indexOf(String.fromCharCode(k))!=-1);
+        } else {
+        	return true;
+        }
+    } else {
+        return true;
+    }
+} 
+
+function startGame(){
+	var n = document.getElementById("nickname").value;
+	var _n = {playerName: n};
+	_n = JSON.stringify(_n);
+	localStorage.setItem('_n', _n);
+
+	console.log(_n);
+	window.location.href = "/play";
+}
+</script>
