@@ -27,16 +27,19 @@ var prev_xpositions = [];
 var ypositions = [];
 var prev_ypositions = [];
 var devices =[];
+var maxUsers = 9;
 
-var speedMultiplier = 8;
+var standardSpeedMultiplier = 8;
+var speedMultipliers = [];
 
 
-for (var i=0; i<9; i++){
+for (var i=0; i<maxUsers; i++){
 	devices.push(0);
 	xpositions.push(0);
 	prev_xpositions.push(0);
 	ypositions.push(0);
 	prev_ypositions.push(0);
+	speedMultipliers.push(standardSpeedMultiplier)
 }
 
 
@@ -45,24 +48,7 @@ var connectedDevices=0;
 //app.set('views', __dirname + '/views');
 //app.set('view engine', 'ejs');
 checkIfAfk();
-function checkIfAfk(){
-	setTimeout(function(){
-		for (var i = 0; i<9; i++){
-			if(xpositions[i] == prev_xpositions[i] &&
-				ypositions[i] == prev_ypositions[i] && devices[i] !=0){
-				console.log("user " + i + " needs to be removed");
-				io.sockets.emit("removeMe", {id:i});
-				//Add code to delete user and open device id serverside,
-				//instead of waiting for a response from client.
-				//device id is still taken when a user opens another app, goes to home screen or screen goes black
-			}
-			prev_xpositions[i] = xpositions[i];
-			prev_ypositions[i] = ypositions[i];
-		}
 
-		checkIfAfk();
-	},15000);
-}
 
 io.on('connection', function(socket){
 	socket.on("requestID", function(data){
@@ -81,6 +67,10 @@ io.on('connection', function(socket){
 		//socket.emit("receiveID", id);
 		//STORE THE PLAYER NAME IN  AN ARRAY
 		socket.emit("receiveID", {id_num: id});
+		io.sockets.emit("sendName", {
+			_id: id,
+			_playerName: data.playerName +id
+		});
 
 		console.log( devices[0] + ", " + devices[1] + ", " +
 			devices[2] + ", " + devices[3] + ", " +
@@ -98,8 +88,8 @@ io.on('connection', function(socket){
 	socket.on("dataTransfer", function(data){
 		
 		var id = parseInt(data.id_num);
-		var xmove = parseFloat(data.x) * speedMultiplier;
-		var ymove = parseFloat(data.y) * speedMultiplier;
+		var xmove = parseFloat(data.x) * speedMultipliers[id];
+		var ymove = parseFloat(data.y) * speedMultipliers[id];
 
 		xpositions[id] = xpositions[id] +xmove;
 		ypositions[id] = ypositions[id] +ymove;
@@ -114,6 +104,14 @@ io.on('connection', function(socket){
 		//io.sockets.emit("dataClient",data);
 	})
 
+	socket.on("playerBoost", function(data){
+		console.log("player " + data.id + " boosted!");
+		speedMultipliers[parseInt(data.id)] = 60;
+		setTimeout(function(){
+			speedMultipliers[parseInt(data.id)] = standardSpeedMultiplier;
+		},500)
+	})
+
 
 
 	socket.on("pressedStart", function(data){
@@ -121,13 +119,37 @@ io.on('connection', function(socket){
     })
 
     socket.on('userDisconnected', function(data){
-    	console.log("user "+ data.remove_id + " left");
     	var remove_id = parseInt(data.remove_id);
     	devices[remove_id] =0;
     	xpositions[remove_id] = 0;
     	ypositions[remove_id] = 0;
+    	console.log("user "+ data.remove_id + " left");
     })
 });
+
+
+function checkIfAfk(){
+	setTimeout(function(){
+		for (var i = 0; i<maxUsers; i++){
+			if(xpositions[i] == prev_xpositions[i] &&
+				ypositions[i] == prev_ypositions[i] && devices[i] !=0){
+				console.log("user " + i + " needs to be removed");
+				io.sockets.emit("removeMe", {id:i});
+				devices[i] =0;
+    			xpositions[i] = 0;
+    			ypositions[i] = 0;
+    			console.log("user "+ i + " kicked for afk");
+				//Add code to delete user and open device id serverside,
+				//instead of waiting for a response from client.
+				//device id is still taken when a user opens another app, goes to home screen or screen goes black
+			}
+			prev_xpositions[i] = xpositions[i];
+			prev_ypositions[i] = ypositions[i];
+		}
+
+		checkIfAfk();
+	},15000);
+}
 
 
 

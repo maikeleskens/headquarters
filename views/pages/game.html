@@ -16,35 +16,44 @@
 			window.oRequestAnimationFrame ||
 			window.msRequestAnimationFrame ||
 			function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-				window.setTimeout( callback, 1000 / 60 );
+				window.setTimeout( callback, 1000 / 35 );
 			};
 		} )();
 	}
 	var ctx;
 	var c;
 
+	var xtargets = [];
+	var ytargets = [];
 	var xpositions = [];
 	var ypositions = [];
+	var names = [];
+	var maxUsers = 12;
+	var easing = 0.075;
 
 
 	window.onload = function(){
 
-	$('#drawCanvas').focus()
-		ctx = drawCanvas.getContext("2d");
-		c=document.getElementById("drawCanvas");
-		ctx=c.getContext("2d");
-		ctx.canvas.width = 700;
-		ctx.canvas.height = 700;
+		$('#drawCanvas').focus()
+			ctx = drawCanvas.getContext("2d");
+			c=document.getElementById("drawCanvas");
+			ctx=c.getContext("2d");
+			ctx.canvas.width = 700;
+			ctx.canvas.height = 700;
 
-		ctx.fillStyle="#ff0000";
-		updatePosition();
+			ctx.fillStyle="#ff0000";
+			
 	//ctx.fillRect(xpos,ypos,10,10);
 
 		init();
-		
+		for (var i = 0; i<maxUsers; i++){
+			xtargets[i] = 0.0;
+			ytargets[i] = 0.0;
+			xpositions[i] = 0.0;
+			ypositions[i] = 0.0;
+		}
+		updatePosition();
 	}
-
-	
 
 	function init(){
 		
@@ -56,25 +65,28 @@
 
 	}
 
-	
+	socket.on('sendName', function(data){
+		console.log("wahed" + data._playerName);
+		names[parseInt(data._id)] = data._playerName;
+	})
 
 	socket.on('dataClient', function(data){
 		var id = parseInt(data.id_num);
 
-		var posX = parseFloat(data.x);
-		var posY = parseFloat(data.y);
-		//var posX = relativeToScreen(parseFloat(data.x), ctx.canvas.width);
-		//var posY = relativeToScreen(parseFloat(data.y), ctx.canvas.height);
+		xtargets[id] = parseFloat(data.x);
+		ytargets[id] = parseFloat(data.y);
 
-		xpositions[id] = posX;
-		ypositions[id] = posY;
+		// if (xpositions[id] == 0 && ypositions == 0){
+		// 	xpositions[id] = xtargets[id];
+		// 	ypositions[id] = ytargets[id];
+		// }
 
-		console.log(posX+ ", "+ posY);
-		var xpos = posX;
-		var ypos = posY;
+		//xpositions[id] = targetX;
+		//ypositions[id] = targetY;
 
-		clearCanvas();
-		updatePosition();
+
+
+		
 	})
 
 	function relativeToScreen(val, newMax){
@@ -90,10 +102,23 @@
 
 
 	function updatePosition(){
-		
-		for (var i = 0; i<9; i++){
+		clearCanvas();
+		for (var i = 0; i<maxUsers; i++){
+			var dx = xtargets[i] - xpositions[i];
+			var dy = ytargets[i] - ypositions[i];
+			// xpositions[1] = xtargets[1];
+			// ypositions[1] = ytargets[1];
+			if ( (dx >0.001 || dx < -0.001) && (dy > 0.001 || dy <-0.001) ){
+				xpositions[i] = xpositions[i] +dx *easing;
+				ypositions[i] = ypositions[i] +dy *easing;
+			}
+			//var test = xpositions[1] +dx *easing;
+			//xpositions[1] = xtargets[1];
+			//ypositions[1] = ytargets[1];
+			ctx.beginPath();
 			ctx.fillRect(xpositions[i],ypositions[i],10,10);
-			console.log(xpositions[i] + ", " + ypositions[i]);
+			ctx.beginPath();
+			ctx.fillText(names[i] ,xpositions[i],ypositions[i]);
 		}
 	}
 	function clearCanvas() {
@@ -101,7 +126,10 @@
 	}
 
 	function update(){
+		//console.log("wahed");
+		updatePosition();
 		requestAnimationFrame(update);
+
 	}
 	
 

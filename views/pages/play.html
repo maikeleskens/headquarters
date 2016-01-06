@@ -112,7 +112,8 @@
 
 	<!--TEMP  DATA -->
 	<div class="box">
-		<span id="myID">No ID yet</span>
+		<span id="myID">No ID yet</span><br>
+		<span id="test">No shit </span>
 	</div>
 	<div id="movementBox"></div>
 	<div id="boostButton"></div>
@@ -134,20 +135,27 @@
 	}
 
 	var socket = io.connect();
-	var currentID;
+	var currentID = 0;
 	var newX = 0;
 	var newY = 0;
 
+	var buttonW = 0;
+	var buttonH =0;
+
 	window.onload = function(){
+		buttonW = $("#boostButton").width();
+		buttonH = $("#boostButton").height();
 		socket.emit("requestID", {playerName: "maikel"});
 		//start with a random position so people dont spawn in the same location with socket emit
 		//also prevents from being afk when the afk timer ended.
 	}
 
 	socket.on("receiveID", function(data){
-		console.log("received id: " + data.id_num);
-		document.getElementById("myID").innerHTML= data.id_num;
-		currentID = data.id_num;
+		if (currentID== 0){
+			console.log("received id: " + data.id_num);
+			document.getElementById("myID").innerHTML= data.id_num;
+			currentID = data.id_num;
+		}
 	});
 
 
@@ -185,6 +193,7 @@
 
  	var maxDragRange = 100;
  	var timer =0
+ 	var canBoost = true;
 
 
  	setupCanvas();
@@ -336,8 +345,18 @@ function draw() {
 				leftVector.reset(0,0); 
 				continue; 		
 			} else {
-
-			}	
+				if (touch.clientX>buttonW){
+					if (touch.clientY >buttonH){
+						document.getElementById("test").innerHTML=touch.clientX + ", " + touch.clientY;
+						if (canBoost == true){
+							socket.emit("playerBoost", {id:currentID});
+							boosted();
+						}	
+					} else{
+						document.getElementById("test").innerHTML ="Tapped the empty area above boost button";
+					}
+				}
+			}
 		}
 		touches = e.touches; 
 	}
@@ -394,6 +413,13 @@ function draw() {
 
 	function MinMax(value, min, max) {
 		return(Math.min(max, Math.max(min, value)));
+	}
+
+	function boosted(){
+		canBoost=false;
+		setTimeout(function(){
+			canBoost=true;
+		},5000);
 	}
 	</script>
 </body>

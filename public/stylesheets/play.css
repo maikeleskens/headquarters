@@ -7,6 +7,10 @@
 		-webkit-tap-highlight-color: rgba(0,0,0,0); 
 	}
 	
+	body, html {
+		font-family: verdana, sans-serif;
+	}
+
 	body {
 		background-color: #000000;
 		margin: 0px;
@@ -23,11 +27,11 @@
 	}
 
 	.box{
-		width: 50px;
-		height:50px;
+		width: 200px;
+		height:65px;
 		background-color: #ffffff;
 		color: #000000;
-		font-size: 24px;
+		font-size: 14px;
 		z-index: 10;
 		position: fixed;
 	}
