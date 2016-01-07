@@ -26,11 +26,15 @@
 	var xpositions = [];
 	var ypositions = [];
 	var names = [];
+	var colors = [];
+	var playerSize=10;
+
+	var startAtUser =1;
 	var maxUsers = 12;
-	var easing = 0.075;
+	var easing = 0.1;
 
 	var receivedDataOnLaunch = false;
-for (var i = 0; i<maxUsers; i++){
+for (var i = startAtUser; i<maxUsers; i++){
 			xtargets[i] = 100.0;
 			ytargets[i] = 100.0;
 			xpositions[i] = 0.0;
@@ -44,8 +48,9 @@ for (var i = 0; i<maxUsers; i++){
 			ctx=c.getContext("2d");
 			ctx.canvas.width = 700;
 			ctx.canvas.height = 700;
-
-			ctx.fillStyle="#ff0000";
+			ctx.font="15px Verdana";
+			ctx.textAlign="center";
+			ctx.fillStyle="#000000";
 			
 	//ctx.fillRect(xpos,ypos,10,10);
 		init();
@@ -53,6 +58,7 @@ for (var i = 0; i<maxUsers; i++){
 
 	function init(){
 		update();
+		updatePlayerList();
 		socket.emit("requestAllCurrentData");
 	}
 
@@ -63,7 +69,7 @@ for (var i = 0; i<maxUsers; i++){
 
 	socket.on("sendAllCurrentData", function(data){
 		//var id = parseInt(data.id);
-		for (var i = 0; i<maxUsers; i++){
+		for (var i = startAtUser; i<maxUsers; i++){
 		xpositions[i] = parseFloat(data.x[i]);
 		ypositions[i] = parseFloat(data.y[i]);
 
@@ -71,9 +77,10 @@ for (var i = 0; i<maxUsers; i++){
 		ytargets[i] = parseFloat(data.y[i]);
 
 		names[i] = data.playerName[i];
+		colors[i] = data.playerColor[i];
 		
 
-		console.log(data.playerName[i]  + ", " + xpositions[i] + ", " + ypositions[i]);
+		console.log(data.playerName[i]  + ", " + data.playerColor[i] + ", " + xpositions[i] + ", " + ypositions[i]);
 	}
 
 		
@@ -84,7 +91,7 @@ for (var i = 0; i<maxUsers; i++){
 
 	socket.on('sendName', function(data){
 		names[parseInt(data._id)] = data._playerName;
-
+		colors[parseInt(data.id)] = data._playerColor;
 	})
 
 	socket.on('dataClient', function(data){
@@ -120,7 +127,7 @@ for (var i = 0; i<maxUsers; i++){
 
 	function updatePosition(){
 		clearCanvas();
-		for (var i = 0; i<maxUsers; i++){
+		for (var i = startAtUser; i<maxUsers; i++){
 			var dx = xtargets[i] - xpositions[i];
 			var dy = ytargets[i] - ypositions[i];
 			// xpositions[1] = xtargets[1];
@@ -133,11 +140,13 @@ for (var i = 0; i<maxUsers; i++){
 			//xpositions[i] = xtargets[i];
 			//ypositions[i] = ytargets[i];
 			//console.log(names[1]);
+			ctx.beginPath();
+			ctx.fillStyle = colors[i];
+			//ctx.translate(10,10);
+			ctx.fillRect(xpositions[i]-(playerSize/2),ypositions[i]-(playerSize/2),playerSize,playerSize);
 
 			ctx.beginPath();
-			ctx.fillRect(xpositions[i],ypositions[i],10,10);
-			ctx.beginPath();
-			ctx.fillText(names[i] ,xpositions[i],ypositions[i]);
+			ctx.fillText(names[i] ,xpositions[i],ypositions[i]-10);
 		}
 	}
 	function clearCanvas() {
@@ -151,6 +160,25 @@ for (var i = 0; i<maxUsers; i++){
 		requestAnimationFrame(update);
 
 	}
+
+	function updatePlayerList(){
+		setTimeout(function(){
+			$("#playerlist").empty();
+			var p = 0;
+			for (var i =startAtUser; i<maxUsers; i++){
+				if (names[i] != undefined && names[i] != ""){
+					p++;
+				}
+			}
+			$("#playerlist").append("<h1>Players [" + p +"/"+ maxUsers + "] </h1>")
+			for (var i = startAtUser; i<maxUsers; i++){
+				if (names[i] != undefined && names[i] != ""){
+					$("#playerlist").append("<div class='playerColorIndicator' style='background-color:"+colors[i]+";'></div> <p>" + names[i] + "</p>");
+				}
+			}
+			updatePlayerList();
+		},5000)
+	}
 	
 
 	</script>
@@ -161,16 +189,21 @@ for (var i = 0; i<maxUsers; i++){
 <div id="mapDiv">
 	<canvas id="drawCanvas"></canvas>
 	<div id="sidebar">
+		<div id="playerlist">
 		<h1>Players</h1>
 		<p>TempMaster Maikel: 400</p>
 		<p>PowerPandaNL: 370</p>
 		<p>Anonymous: 280</p>
 		<p>Armée de Terre: 270</p>
 		<p>Rome: 160</p>
+		</div>
 
 		<hr>
-
-		More text
+			Info?
+		<hr>
+		<p class="smalltext">Copyright ©2015 Maikel Eskens. All rights reserved<br>
+			<a href="www.maikeleskens.com" target="_blank">www.maikeleskens.com</a>
+		</p>
 	</div>
 </div>
 

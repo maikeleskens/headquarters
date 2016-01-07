@@ -26,20 +26,28 @@ app.get('/afk', function(req, res){
 	res.sendfile('views/pages/afk.html');
 })
 
-var xpositions =[];
-var prev_xpositions = [];
-var ypositions = [];
-var prev_ypositions = [];
 var devices =[];
+
 var playerNames = [];
-var maxUsers = 9;
+var xpositions =[];
+var ypositions = [];
+var prev_xpositions = [];
+var prev_ypositions = [];
 
-var standardSpeedMultiplier = 12;
+//TEMP PLAYER COLORS
+var playerColors = [
+	"#ff0000", "#3F8299", "#8C261E", "#FFA24D", "#582F7F", "#2F477F", "#2F7F31", "#FF3263", "#000000", "#000000", "#000000", "#000000", "#000000"
+];
+
+var maxUsers = 12;
+var startAtUser = 1;
+
+var standardSpeedMultiplier = 20;
 var speedMultipliers = [];
-var boostSpeed = 80;
+var boostSpeed = 120;
 
 
-for (var i=0; i<maxUsers; i++){
+for (var i=startAtUser; i<maxUsers; i++){
 	devices.push(0);
 	xpositions.push(0);
 	prev_xpositions.push(0);
@@ -62,7 +70,7 @@ io.on('connection', function(socket){
 		connectedDevices++;
 		devices.push(connectedDevices);
 
-		var i = 0;
+		var i = startAtUser;
 		while(i==devices[i]){
 			i++;
 		}
@@ -79,7 +87,8 @@ io.on('connection', function(socket){
 		//SEND THE PLAYER NAME 
 		io.sockets.emit("sendName", {
 			_id: id,
-			_playerName: playerNames[id]
+			_playerName: playerNames[id],
+			_playerColor: playerColors[id]
 		});
 
 		console.log(devices[1] + playerNames[1] + ", " +
@@ -91,12 +100,7 @@ io.on('connection', function(socket){
 	})
 
 	socket.on("requestAllCurrentData", function(){
-		socket.emit("sendAllCurrentData", {
-			id_num : devices,
-			playerName: playerNames,
-			x : xpositions,
-			y : ypositions
-		});
+		sendAllData();
 		console.log(playerNames);
 	})
 
@@ -114,7 +118,7 @@ io.on('connection', function(socket){
 		xpositions[id] = xpositions[id] +xmove;
 		ypositions[id] = ypositions[id] +ymove;
 
-		console.log("x: "+ xpositions[id] + ", y: " +ypositions[id]);
+		console.log(playerNames[id] + ": x: "+ xpositions[id] + ", y: " +ypositions[id]);
 		io.sockets.emit("dataClient", {
 			id_num : id,
 			x : xpositions[id],
@@ -129,7 +133,7 @@ io.on('connection', function(socket){
 		speedMultipliers[parseInt(data.id)] = boostSpeed;
 		setTimeout(function(){
 			speedMultipliers[parseInt(data.id)] = standardSpeedMultiplier;
-		},250)
+		},200)
 	})
 
 
@@ -143,15 +147,17 @@ io.on('connection', function(socket){
     	devices[remove_id] =0;
     	xpositions[remove_id] = 0;
     	ypositions[remove_id] = 0;
-    	playerNames[remove_id] = " ";
+    	playerNames[remove_id] = "";
+    	sendAllData();
     	console.log("user "+ data.remove_id + " left");
     })
+
 });
 
 
 function checkIfAfk(){
 	setTimeout(function(){
-		for (var i = 0; i<maxUsers; i++){
+		for (var i = startAtUser; i<maxUsers; i++){
 			if(xpositions[i] == prev_xpositions[i] &&
 				ypositions[i] == prev_ypositions[i] && devices[i] !=0){
 				console.log("user " + i + " needs to be removed");
@@ -159,8 +165,9 @@ function checkIfAfk(){
 				devices[i] =0;
     			xpositions[i] = 0;
     			ypositions[i] = 0;
-    			playerNames[i] = " ";
+    			playerNames[i] = "";
     			console.log("user "+ i + " kicked for afk");
+    			sendAllData();
 				//Add code to delete user and open device id serverside,
 				//instead of waiting for a response from client.
 				//device id is still taken when a user opens another app, goes to home screen or screen goes black
@@ -172,6 +179,17 @@ function checkIfAfk(){
 		checkIfAfk();
 	},25000);
 }
+
+    function sendAllData(){
+		io.sockets.emit("sendAllCurrentData", {
+			id_num : devices,
+			playerName: playerNames,
+			playerColor: playerColors,
+			x : xpositions,
+			y : ypositions
+		});
+		console.log("data send");
+	}
 
 
 

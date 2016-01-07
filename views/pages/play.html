@@ -108,7 +108,9 @@
 
 </head>
 <body onload = "init()">
+<div id="warningMSG"><div class="centerer"><h1 style="color:#ffffff; font-size:10vh;">Hold your screen in landscape mode to play</h1></div></div>
 
+<div id="container">
 	<div id="movementBox">
 		<div class="centerer">
 			<h1>Use your thumb to move here</h1>
@@ -150,6 +152,8 @@
 
 	var buttonW = 0;
 	var buttonH =0;
+
+	var landscape= false;
 
 	window.onload = function(){
 		buttonW = $("#boostButton").width();
@@ -254,7 +258,13 @@ function init(){
 	
 }
 function draw() {
-
+	
+if(window.innerHeight > window.innerWidth){
+    landscape = false;
+} else {
+	landscape = true;
+}
+	if (landscape ==true){
 	c.clearRect(0,0,canvas.width, canvas.height); 
 	
 	
@@ -308,7 +318,7 @@ function draw() {
 				c.fillStyle = "white";
 				c.fillText("touch id : "+touch.identifier+" x:"+touch.clientX+" y:"+touch.clientY, touch.clientX+30, touch.clientY-30); 
 				c.beginPath(); 
-				c.strokeStyle = "red";
+				c.strokeStyle = "cyan";
 				c.lineWidth = "6";
 				c.arc(touch.clientX, touch.clientY, 40, 0, Math.PI*2, true); 
 				c.stroke();
@@ -333,6 +343,7 @@ function draw() {
 		newY=0;
 		timer=0;
 	}
+}
 }
 /*	
  *	Touch event (e) properties : 
@@ -442,5 +453,6 @@ function draw() {
 		},5000);
 	}
 	</script>
+	</div>
 </body>
 </html>

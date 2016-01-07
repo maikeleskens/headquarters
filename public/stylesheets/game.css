@@ -24,3 +24,11 @@ canvas{
 	padding: 0 50px 0 50px;
 	border-left: 8px solid #585555;
 }
+
+.playerColorIndicator{
+	width: 10px;
+	height:10px;
+	background-color: #464646;
+	float: left;
+	margin-right: 5px;
+}
