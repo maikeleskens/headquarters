@@ -1,0 +1,26 @@
+body{
+	padding: 0;
+	margin: 0;
+}
+
+canvas{
+	float: left;
+	display: block;
+	background-color: #EDEDED;
+}
+
+#mapDiv {
+	min-width: 1062px;
+	width:100%;
+	height:100%;
+}
+
+#sidebar{
+	width: 250px;
+	height: 100%;
+	background-color: #484646;
+	color:#ffffff;
+	float: left;
+	padding: 0 50px 0 50px;
+	border-left: 8px solid #585555;
+}

@@ -101,7 +101,7 @@
 	<script src="/js/Vector2.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-
+	<link rel="stylesheet" type="text/css" href="/stylesheets/shared.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/play.css">
 
 
@@ -109,14 +109,22 @@
 </head>
 <body onload = "init()">
 
-
-	<!--TEMP  DATA -->
-	<div class="box">
-		<span id="myID">No ID yet</span><span id="pname">No name</span><br>
-		<span id="test">No shit </span>
+	<div id="movementBox">
+		<div class="centerer">
+			<h1>Use your thumb to move here</h1>
+		</div>
 	</div>
-	<div id="movementBox"></div>
-	<div id="boostButton"></div>
+	<div id="boostButton">
+		<div class="centerer">
+			<h1>Tap here to attack!</h1>
+		</div>
+	</div>
+
+	<div id="infoBox">
+		<span id="myID">No ID yet</span>
+		<h2>Your Name:</h2>
+		<h1 id="pname">No name</h1><br>
+	</div>
 
 
 
@@ -361,13 +369,11 @@ function draw() {
 			} else {
 				if (touch.clientX>buttonW){
 					if (touch.clientY >buttonH){
-						document.getElementById("test").innerHTML=touch.clientX + ", " + touch.clientY;
 						if (canBoost == true){
 							socket.emit("playerBoost", {id:currentID});
 							boosted();
 						}	
 					} else{
-						document.getElementById("test").innerHTML ="Tapped the empty area above boost button";
 					}
 				}
 			}

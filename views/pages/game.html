@@ -2,11 +2,9 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<style type="text/css">
-		body{padding: 0; margin: 0;}
-		canvas{display: block; background-color: #EDEDED;}
-		#mapDiv {width:100%; height:100%;}
-	</style>
+<link rel="stylesheet" type="text/css" href="/stylesheets/shared.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/game.css">
+
 <script type="text/javascript">
 
 	if ( !window.requestAnimationFrame ) {
@@ -134,7 +132,7 @@ for (var i = 0; i<maxUsers; i++){
 			//var test = xpositions[1] +dx *easing;
 			//xpositions[i] = xtargets[i];
 			//ypositions[i] = ytargets[i];
-			console.log(names[1]);
+			//console.log(names[1]);
 
 			ctx.beginPath();
 			ctx.fillRect(xpositions[i],ypositions[i],10,10);
@@ -161,7 +159,19 @@ for (var i = 0; i<maxUsers; i++){
 <body>
 
 <div id="mapDiv">
-<canvas id="drawCanvas"></canvas>
+	<canvas id="drawCanvas"></canvas>
+	<div id="sidebar">
+		<h1>Players</h1>
+		<p>TempMaster Maikel: 400</p>
+		<p>PowerPandaNL: 370</p>
+		<p>Anonymous: 280</p>
+		<p>Armée de Terre: 270</p>
+		<p>Rome: 160</p>
+
+		<hr>
+
+		More text
+	</div>
 </div>
 
 </body>

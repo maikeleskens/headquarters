@@ -7,9 +7,6 @@
 		-webkit-tap-highlight-color: rgba(0,0,0,0); 
 	}
 	
-	body, html {
-		font-family: verdana, sans-serif;
-	}
 
 	body {
 		background-color: #000000;
@@ -26,15 +23,7 @@
 		background-color:#000000;
 	}
 
-	.box{
-		width: 200px;
-		height:65px;
-		background-color: #ffffff;
-		color: #000000;
-		font-size: 14px;
-		z-index: 10;
-		position: fixed;
-	}
+	
 
 	#movementBox{
 		width: 50%;
@@ -44,11 +33,62 @@
 		left: 0;
 	}
 
+	.centerer{
+		width: 100%;
+		
+	}
+	.centerer h1{
+		font-weight: bold;
+		font-family: verdana, sans-serif;
+	}
+	#movementBox h1{
+		color:#262323;
+		text-align: center;
+		font-size: 15vh;
+		
+	}
+	#movementBox h2 {
+		text-align: center;
+		font-family: verdana, sans-serif;
+		font-size: 6vh;
+		font-weight: bold;
+	}
+
 	#boostButton{
 		width: 50%;
 		height: 50%;
 		position: absolute;
 		right: 0;
 		bottom:0;
-		background-color: #460046;
+		background-color: #20aabe;
+
+	}
+
+	#boostButton h1{
+		color: #30dced;
+		text-align: center;
+		font-size: 14vh;
+	}
+	#infoBox{
+		width: 50%;
+		height:50%;
+		background-color: #252020;
+		color: #bebebe;
+		position: absolute;
+		right: 0;
+		top:0;
+	}
+
+	#infoBox h1{
+
+		font-size: 12vh;
+		text-align: center;
+		text-shadow: -2px -2px #101010;
+		margin-top: 0;
+	}
+
+	#infoBox h2 {
+		font-size: 4vh;
+		text-align: center;
+		margin-bottom: 0;
 	}
