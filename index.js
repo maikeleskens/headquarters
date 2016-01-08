@@ -26,6 +26,9 @@ app.get('/afk', function(req, res){
 	res.sendfile('views/pages/afk.html');
 })
 
+var screenwidth = 700;
+var screenheight = 700;
+
 var devices =[];
 
 var playerNames = [];
@@ -170,11 +173,32 @@ function serversideMove(){
 		var dy = ypositions[i] - moveToY[i];
 
 		 if ( (dx >0.001 || dx < -0.001) && (dy > 0.001 || dy <-0.001) ){
-		 	moveToX[i] = moveToX[i] + dx;
-		 	moveToY[i] = moveToY[i] + dy;
+		 	moveToX[i] = moveToX[i] + dx * easing;
+		 	moveToY[i] = moveToY[i] + dy * easing;
 		 } else{
-		 	moveToX[i] = xpositions[i];
-		 	moveToY[i] = ypositions[i];
+		 	//moveToX[i] = xpositions[i];
+		 	//moveToY[i] = ypositions[i];
+		 }
+
+		 if (moveToX[i] > screenwidth){
+		 	xpositions[i] = 0;
+		 	moveToX[i] = 0;
+		 	resetPosition(i);
+		 }
+		 if (moveToX[i] < 0){
+		 	xpositions[i] = screenwidth;
+		 	moveToX[i] = screenwidth;
+		 	resetPosition(i);
+		 }
+		 if (moveToY[i] >screenheight){
+		 	ypositions[i] = 0;
+		 	moveToY[i] = 0;
+		 	resetPosition(i);
+		 }
+		 if(moveToY[i] <0){
+		 	ypositions[i] = screenheight;
+		 	moveToY[i] = screenheight;
+		 	resetPosition(i);
 		 }
 
 		//moveToX[i] = xpositions[i];
@@ -203,6 +227,15 @@ function serversideMove(){
 		serversideMove();
 	},2)
 }
+
+function resetPosition(id){
+	io.sockets.emit("resetposition", {
+		id_num : id,
+		x : xpositions[id],
+		y : ypositions[id]
+	})
+}
+
 function checkIfAfk(){
 	setTimeout(function(){
 		for (var i = startAtUser; i<maxUsers; i++){

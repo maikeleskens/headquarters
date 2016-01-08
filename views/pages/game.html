@@ -117,6 +117,16 @@ for (var i = startAtUser; i<maxUsers; i++){
 		
 	})
 
+	socket.on('resetposition', function(data){
+		console.log("resetted");
+		var i = parseInt(data.id_num);
+		xpositions[i] = parseFloat(data.x);
+		ypositions[i] = parseFloat(data.y);
+
+		xtargets[i] = parseFloat(data.x);
+		ytargets[i] = parseFloat(data.y);
+	})
+
 	socket.on('playerKilled', function(data){
 		console.log("player " + data.id_num + " got killed");
 		var i = parseInt(data.id_num);
