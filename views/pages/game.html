@@ -78,6 +78,8 @@ for (var i = startAtUser; i<maxUsers; i++){
 
 		names[i] = data.playerName[i];
 		colors[i] = data.playerColor[i];
+
+		easing = parseFloat(data.easing);
 		
 
 		console.log(data.playerName[i]  + ", " + data.playerColor[i] + ", " + xpositions[i] + ", " + ypositions[i]);
@@ -100,6 +102,8 @@ for (var i = startAtUser; i<maxUsers; i++){
 		xtargets[id] = parseFloat(data.x);
 		ytargets[id] = parseFloat(data.y);
 
+		console.log("x: " + xtargets[id] + ", y: " + ytargets[id])
+
 		// if (xpositions[id] == 0 && ypositions == 0){
 		// 	xpositions[id] = xtargets[id];
 		// 	ypositions[id] = ytargets[id];
@@ -111,6 +115,18 @@ for (var i = startAtUser; i<maxUsers; i++){
 
 
 		
+	})
+
+	socket.on('playerKilled', function(data){
+		console.log("player " + data.id_num + " got killed");
+		var i = parseInt(data.id_num);
+		xpositions[i] = parseFloat(data.x);
+		ypositions[i] = parseFloat(data.y);
+
+		xtargets[i] = parseFloat(data.x);
+		ytargets[i] = parseFloat(data.y);
+		console.log(data.x);
+		//updatePosition();
 	})
 
 	function relativeToScreen(val, newMax){

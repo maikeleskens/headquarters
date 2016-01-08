@@ -31,8 +31,13 @@ var devices =[];
 var playerNames = [];
 var xpositions =[];
 var ypositions = [];
+var moveToX = [];
+var moveToY = [];
 var prev_xpositions = [];
 var prev_ypositions = [];
+var playerBoosting = [];
+
+var easing = 0.1;
 
 //TEMP PLAYER COLORS
 var playerColors = [
@@ -47,12 +52,15 @@ var speedMultipliers = [];
 var boostSpeed = 120;
 
 
-for (var i=startAtUser; i<maxUsers; i++){
+for (var i=startAtUser; i<maxUsers+1; i++){
 	devices.push(0);
 	xpositions.push(0);
-	prev_xpositions.push(0);
 	ypositions.push(0);
+	prev_xpositions.push(0);
 	prev_ypositions.push(0);
+	moveToX.push(0);
+	moveToY.push(0);
+	playerBoosting.push(false);
 	speedMultipliers.push(standardSpeedMultiplier)
 }
 
@@ -62,6 +70,7 @@ var connectedDevices=0;
 //app.set('views', __dirname + '/views');
 //app.set('view engine', 'ejs');
 checkIfAfk();
+serversideMove();
 
 
 io.on('connection', function(socket){
@@ -124,14 +133,15 @@ io.on('connection', function(socket){
 			x : xpositions[id],
 			y : ypositions[id]
 		})
-
 		//io.sockets.emit("dataClient",data);
 	})
 
 	socket.on("playerBoost", function(data){
 		console.log("player " + data.id + " boosted!");
+		playerBoosting[parseInt(data.id)] =true;
 		speedMultipliers[parseInt(data.id)] = boostSpeed;
 		setTimeout(function(){
+			playerBoosting[parseInt(data.id)] =false;
 			speedMultipliers[parseInt(data.id)] = standardSpeedMultiplier;
 		},200)
 	})
@@ -154,7 +164,45 @@ io.on('connection', function(socket){
 
 });
 
+function serversideMove(){
+	for (var i = startAtUser; i<maxUsers; i++){
+		var dx = xpositions[i] - moveToX[i];
+		var dy = ypositions[i] - moveToY[i];
 
+		 if ( (dx >0.001 || dx < -0.001) && (dy > 0.001 || dy <-0.001) ){
+		 	moveToX[i] = moveToX[i] + dx;
+		 	moveToY[i] = moveToY[i] + dy;
+		 } else{
+		 	moveToX[i] = xpositions[i];
+		 	moveToY[i] = ypositions[i];
+		 }
+
+		//moveToX[i] = xpositions[i];
+		//moveToY[i] = ypositions[i];
+
+		if (playerBoosting[i] == true){
+			for (var j = startAtUser; j<maxUsers; j++){
+				var distX = moveToX[i] - moveToX[j];
+				var distY = moveToY[i] - moveToY[j];
+				if (distX < 50 && distX > -50 && distY < 50 && distY > -50 && i != j){
+					console.log("player " + i + " killed " + j);
+					//temp move yposition of the players thats been hit
+					xpositions[j] = 70;
+					ypositions[j] = 70;
+					io.sockets.emit("playerKilled", {
+						id_num : j,
+						x : xpositions[j],
+						y : ypositions[j]
+					})
+					console.log("x: " + xpositions[j] + ", y: " + ypositions[j]);
+				}
+			}
+		}
+	}
+	setTimeout(function(){
+		serversideMove();
+	},2)
+}
 function checkIfAfk(){
 	setTimeout(function(){
 		for (var i = startAtUser; i<maxUsers; i++){
@@ -186,7 +234,8 @@ function checkIfAfk(){
 			playerName: playerNames,
 			playerColor: playerColors,
 			x : xpositions,
-			y : ypositions
+			y : ypositions,
+			easing : easing
 		});
 		console.log("data send");
 	}
