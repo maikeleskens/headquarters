@@ -26,7 +26,7 @@ app.get('/afk', function(req, res){
 	res.sendfile('views/pages/afk.html');
 })
 
-var screenwidth = 700;
+var screenwidth = 900;
 var screenheight = 700;
 
 var devices =[];
@@ -112,8 +112,12 @@ io.on('connection', function(socket){
 	})
 
 	socket.on("requestAllCurrentData", function(){
-		sendAllData();
 		console.log(playerNames);
+		socket.emit("setScreenSize", {
+			swidth : screenwidth,
+			sheight : screenheight
+		})
+		sendAllData();
 	})
 
 	socket.on("imOnline", function(data){

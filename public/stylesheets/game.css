@@ -1,18 +1,23 @@
 body{
 	padding: 0;
 	margin: 0;
+	background-color: #363636;
 }
 
 canvas{
 	float: left;
 	display: block;
 	background-color: #EDEDED;
+	height:100%;
 }
 
 #mapDiv {
 	min-width: 1062px;
 	width:100%;
 	height:100%;
+}
+
+#canvasContainer{
 }
 
 #sidebar{
@@ -23,6 +28,7 @@ canvas{
 	float: left;
 	padding: 0 50px 0 50px;
 	border-left: 8px solid #585555;
+	box-shadow: 0px 0 10px #262626;
 }
 
 .playerColorIndicator{

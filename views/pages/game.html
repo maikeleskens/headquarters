@@ -33,6 +33,10 @@
 	var maxUsers = 12;
 	var easing = 0.1;
 
+	var screenWidth = 700;
+	var screenHeight = 500;
+	var relativeToScreen = 1.0;
+
 	var receivedDataOnLaunch = false;
 for (var i = startAtUser; i<maxUsers; i++){
 			xtargets[i] = 100.0;
@@ -42,19 +46,21 @@ for (var i = startAtUser; i<maxUsers; i++){
 		}
 
 	window.onload = function(){
+		fullscreen();
 		$('#drawCanvas').focus()
 			ctx = drawCanvas.getContext("2d");
 			c=document.getElementById("drawCanvas");
 			ctx=c.getContext("2d");
-			ctx.canvas.width = 700;
-			ctx.canvas.height = 700;
-			ctx.font="15px Verdana";
-			ctx.textAlign="center";
-			ctx.fillStyle="#000000";
+			ctx.canvas.width = screenWidth;
+			ctx.canvas.height = screenHeight;
+			
 			
 	//ctx.fillRect(xpos,ypos,10,10);
 		init();
 	}
+
+	function fullscreen() {
+    }
 
 	function init(){
 		update();
@@ -67,20 +73,42 @@ for (var i = startAtUser; i<maxUsers; i++){
 
 	}
 
+	socket.on("setScreenSize",function(data){
+		screenWidth = parseInt(data.swidth);
+		screenHeight = parseInt(data.sheight);
+
+		 relativeToScreen = window.innerHeight / screenHeight;
+
+		 screenWidth = screenWidth * relativeToScreen;
+		 screenHeight = screenHeight *relativeToScreen;
+
+		var minWidth = screenWidth + 360;
+		$('#mapDiv').css({
+			"min-width": minWidth + "px"
+		})
+
+		console.log("width: " + screenWidth + ", height: " +screenHeight);
+		ctx.canvas.width = screenWidth;
+		ctx.canvas.height = screenHeight;
+		ctx.font="15px Verdana";
+		ctx.textAlign="center";
+		ctx.fillStyle="#000000";
+		
+	})
+
 	socket.on("sendAllCurrentData", function(data){
 		//var id = parseInt(data.id);
 		for (var i = startAtUser; i<maxUsers; i++){
-		xpositions[i] = parseFloat(data.x[i]);
-		ypositions[i] = parseFloat(data.y[i]);
+		xpositions[i] = parseFloat(data.x[i]) * relativeToScreen;
+		ypositions[i] = parseFloat(data.y[i]) * relativeToScreen;
 
-		xtargets[i] = parseFloat(data.x[i]);
-		ytargets[i] = parseFloat(data.y[i]);
+		xtargets[i] = parseFloat(data.x[i]) *relativeToScreen;
+		ytargets[i] = parseFloat(data.y[i]) *relativeToScreen;
 
 		names[i] = data.playerName[i];
 		colors[i] = data.playerColor[i];
 
 		easing = parseFloat(data.easing);
-		
 
 		console.log(data.playerName[i]  + ", " + data.playerColor[i] + ", " + xpositions[i] + ", " + ypositions[i]);
 	}
@@ -99,8 +127,8 @@ for (var i = startAtUser; i<maxUsers; i++){
 	socket.on('dataClient', function(data){
 		var id = parseInt(data.id_num);
 
-		xtargets[id] = parseFloat(data.x);
-		ytargets[id] = parseFloat(data.y);
+		xtargets[id] = parseFloat(data.x)*relativeToScreen;
+		ytargets[id] = parseFloat(data.y)*relativeToScreen;
 
 		console.log("x: " + xtargets[id] + ", y: " + ytargets[id])
 
@@ -120,29 +148,25 @@ for (var i = startAtUser; i<maxUsers; i++){
 	socket.on('resetposition', function(data){
 		console.log("resetted");
 		var i = parseInt(data.id_num);
-		xpositions[i] = parseFloat(data.x);
-		ypositions[i] = parseFloat(data.y);
+		xpositions[i] = parseFloat(data.x)*relativeToScreen;
+		ypositions[i] = parseFloat(data.y)*relativeToScreen;
 
-		xtargets[i] = parseFloat(data.x);
-		ytargets[i] = parseFloat(data.y);
+		xtargets[i] = parseFloat(data.x)*relativeToScreen;
+		ytargets[i] = parseFloat(data.y)*relativeToScreen;
 	})
 
 	socket.on('playerKilled', function(data){
 		console.log("player " + data.id_num + " got killed");
 		var i = parseInt(data.id_num);
-		xpositions[i] = parseFloat(data.x);
-		ypositions[i] = parseFloat(data.y);
+		xpositions[i] = parseFloat(data.x)*relativeToScreen;
+		ypositions[i] = parseFloat(data.y)*relativeToScreen;
 
-		xtargets[i] = parseFloat(data.x);
-		ytargets[i] = parseFloat(data.y);
+		xtargets[i] = parseFloat(data.x)*relativeToScreen;
+		ytargets[i] = parseFloat(data.y)*relativeToScreen;
 		console.log(data.x);
 		//updatePosition();
 	})
 
-	function relativeToScreen(val, newMax){
-		var v = (val/100)*newMax;
-		return v;
-	}
 
 /*
 	function map (var value:float, var low1:float, var high1:float, var low2:float, var high2:float){
