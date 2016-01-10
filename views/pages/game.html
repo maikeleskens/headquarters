@@ -27,7 +27,12 @@
 	var ypositions = [];
 	var names = [];
 	var colors = [];
-	var playerSize=10;
+	//TEMP SCORES
+	var scores = [100,140,200,30,20,0,0,10,200,50,70,60];
+
+	var gameLog = [];
+	var isCharging = [];
+	var playerSize=5;
 
 	var startAtUser =1;
 	var maxUsers = 12;
@@ -43,6 +48,7 @@ for (var i = startAtUser; i<maxUsers; i++){
 			ytargets[i] = 100.0;
 			xpositions[i] = 0.0;
 			ypositions[i] = 0.0;
+			isCharging[i] = false;
 		}
 
 	window.onload = function(){
@@ -156,15 +162,34 @@ for (var i = startAtUser; i<maxUsers; i++){
 	})
 
 	socket.on('playerKilled', function(data){
-		console.log("player " + data.id_num + " got killed");
 		var i = parseInt(data.id_num);
+		var killedBy = parseInt(data.killedBy);
 		xpositions[i] = parseFloat(data.x)*relativeToScreen;
 		ypositions[i] = parseFloat(data.y)*relativeToScreen;
 
 		xtargets[i] = parseFloat(data.x)*relativeToScreen;
 		ytargets[i] = parseFloat(data.y)*relativeToScreen;
-		console.log(data.x);
-		//updatePosition();
+		gameLog.push("<b><span style='color:" +colors[i] + "'>" + names[i] +
+			"</span> </b>was killed by <b><span style='color:" + colors[killedBy] + "'>" + names[killedBy] + "</span></b>");
+		if (gameLog.length > 5){
+			gameLog.shift();
+		}
+
+		$('#gamelog').empty();
+		for (var g = 0; g<gameLog.length; g++){
+			$('#gamelog').append(gameLog[g] + "<br>");
+		}
+
+	})
+
+	socket.on('startCharge', function(data){
+		isCharging[parseInt(data.id)] = true;
+		console.log("player " + data.id + " started charging");
+	})
+
+	socket.on('stopCharge', function(data){
+		isCharging[parseInt(data.id)] = false;
+		console.log("player " + data.id + " stopped charging");
 	})
 
 
@@ -191,9 +216,18 @@ for (var i = startAtUser; i<maxUsers; i++){
 			//ypositions[i] = ytargets[i];
 			//console.log(names[1]);
 			ctx.beginPath();
-			ctx.fillStyle = colors[i];
+			
 			//ctx.translate(10,10);
-			ctx.fillRect(xpositions[i]-(playerSize/2),ypositions[i]-(playerSize/2),playerSize,playerSize);
+
+			if (isCharging[i] == true){
+				ctx.fillStyle = 'blue';
+				ctx.arc(xpositions[i], ypositions[i],playerSize*1.5,0,2*Math.PI);
+				ctx.fill();
+			}
+			ctx.fillStyle = colors[i];
+			ctx.arc(xpositions[i], ypositions[i],playerSize,0,2*Math.PI);
+			ctx.fill();
+			//ctx.fillRect(xpositions[i]-(playerSize/2),ypositions[i]-(playerSize/2),playerSize,playerSize);
 
 			ctx.beginPath();
 			ctx.fillText(names[i] ,xpositions[i],ypositions[i]-10);
@@ -223,11 +257,12 @@ for (var i = startAtUser; i<maxUsers; i++){
 			$("#playerlist").append("<h1>Players [" + p +"/"+ maxUsers + "] </h1>")
 			for (var i = startAtUser; i<maxUsers; i++){
 				if (names[i] != undefined && names[i] != ""){
-					$("#playerlist").append("<div class='playerColorIndicator' style='background-color:"+colors[i]+";'></div> <p>" + names[i] + "</p>");
+					$("#playerlist").append("<div class='playerColorIndicator' style='background-color:"+colors[i]+";'></div> <p>" +
+						names[i] + " : <b>" + scores[i] + "</b></p>");
 				}
 			}
 			updatePlayerList();
-		},5000)
+		},1000)
 	}
 	
 
@@ -241,15 +276,12 @@ for (var i = startAtUser; i<maxUsers; i++){
 	<div id="sidebar">
 		<div id="playerlist">
 		<h1>Players</h1>
-		<p>TempMaster Maikel: 400</p>
-		<p>PowerPandaNL: 370</p>
-		<p>Anonymous: 280</p>
-		<p>Armée de Terre: 270</p>
-		<p>Rome: 160</p>
 		</div>
 
 		<hr>
-			Info?
+		<div id="gamelog">
+			
+		</div>
 		<hr>
 		<p class="smalltext">Copyright ©2015 Maikel Eskens. All rights reserved<br>
 			<a href="www.maikeleskens.com" target="_blank">www.maikeleskens.com</a>

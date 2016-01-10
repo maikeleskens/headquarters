@@ -147,10 +147,12 @@ io.on('connection', function(socket){
 		console.log("player " + data.id + " boosted!");
 		playerBoosting[parseInt(data.id)] =true;
 		speedMultipliers[parseInt(data.id)] = boostSpeed;
+		io.sockets.emit("startCharge", {id : data.id});
 		setTimeout(function(){
 			playerBoosting[parseInt(data.id)] =false;
 			speedMultipliers[parseInt(data.id)] = standardSpeedMultiplier;
-		},200)
+			io.sockets.emit("stopCharge", {id : data.id});
+		},250)
 	})
 
 
@@ -217,10 +219,13 @@ function serversideMove(){
 					//temp move yposition of the players thats been hit
 					xpositions[j] = 70;
 					ypositions[j] = 70;
+					moveToX[j] = 70;
+					moveToY[j] = 70;
 					io.sockets.emit("playerKilled", {
 						id_num : j,
 						x : xpositions[j],
-						y : ypositions[j]
+						y : ypositions[j],
+						killedBy : i
 					})
 					console.log("x: " + xpositions[j] + ", y: " + ypositions[j]);
 				}
