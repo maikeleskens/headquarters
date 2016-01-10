@@ -54,3 +54,45 @@ hr{
 p.smalltext{
 	font-size: 9px;
 }
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+input[type="text"] {
+    width: 100%;
+    display: block;
+    margin-bottom: 10px;
+    padding: 25px;
+    font-size: 20px;
+    background-color: #170d0d;
+    border: 2px solid #ffffff;
+    color:#ffffff;
+}
+
+button.startGame{
+	width: 100%;
+	padding:25px;
+	background-color: #20aabe;
+	font-size: 20px;
+	text-transform: uppercase;
+	color: #ffffff;
+	font-weight: bold;
+	border: 3px solid #204646;
+}
+
+button.startGame:active{
+	border: 3px solid #ffffff;
+}
+
+.popup{
+	width: auto;
+	height:auto;
+	background-color: #dedede;
+	padding:10px;
+	margin:0px auto;
+	color:#ff0000;
+	display:none;
+}

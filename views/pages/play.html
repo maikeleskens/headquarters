@@ -1,97 +1,3 @@
-<!-- <html>
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script type="text/javascript">
-
-	if ( !window.requestAnimationFrame ) {
-		window.requestAnimationFrame = ( function() {
-			return window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame ||
-			window.oRequestAnimationFrame ||
-			window.msRequestAnimationFrame ||
-			function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-				window.setTimeout( callback, 1000 / 60 );
-			};
-		} )();
-	}
-
-	var socket = io.connect();
-	var currentID;
-
-	var xpos = 0;
-	var ypos = 0;
-
-	window.onload = function(){
-		socket.emit("requestID", {playerName: "maikel"});
-	}
-
-	socket.on("receiveID", function(data){
-		console.log("received id: " + data.id_num);
-		document.getElementById("myID").innerHTML= data.id_num;
-		currentID = data.id_num;
-	});
-
-
-	socket.on("removeMe", function(data){
-		var _id = parseInt(data.id);
-		console.log(_id);
-		if (_id == currentID){
-			socket.emit("userDisconnected", {remove_id : currentID});
-			window.location.href = "/afk";
-		}
-	})
-
-	function moveUp(){
-		ypos= -10;
-		sendData();
-	}
-
-	function moveDown(){
-		ypos = 10;
-		sendData();
-	}
-	function moveLeft(){
-		xpos = -10;
-		sendData();
-	}
-	function moveRight(){
-		xpos=10;
-		sendData();
-	}
-
-	function sendData(){
-		socket.emit("dataTransfer", {
-			id_num : currentID,
-			x : xpos,
-			y : ypos
-		});
-		console.log("sendtest");
-		ypos= 0;
-		xpos=0;
-	}
-	
-	window.onbeforeunload = closingCode;
-	function closingCode(){
-		socket.emit("userDisconnected", {remove_id : currentID});
-   		return null;
-	}
-
-	</script>
-</head>
-
-<body>
-<span id="myID"> No ID received </span>
-
-<button onClick="moveUp()">Up </button>
-<button onClick="moveDown()">Down </button>
-<button onClick="moveLeft()">Left </button>
-<button onClick="moveRight()">Right </button>
-
-
-</body>
-</html> -->
-
 <!doctype html>
 <html lang=en>
 <head>
@@ -158,6 +64,8 @@
 	window.onload = function(){
 		buttonW = $("#boostButton").width();
 		buttonH = $("#boostButton").height();
+
+
 		var _n = localStorage.getItem('_n');
 		if (_n){
 			_n = JSON.parse(_n);
@@ -166,12 +74,18 @@
 			playerName = _n.playerName;
 			document.getElementById('pname').innerHTML = playerName;
 			console.log(playerName);
+			localStorage.removeItem('_n');
 		}
-		socket.emit("requestID", {
-			playerName: playerName,
-			startX: 100,
-			startY: 100
-		});
+
+		if (playerName != undefined && playerName != ""){
+			socket.emit("requestID", {
+				playerName: playerName,
+				startX: 100,
+				startY: 100
+			});
+		} else {
+			window.location.href = "/join";
+		}
 		//start with a random position so people dont spawn in the same location with socket emit
 		//also prevents from being afk when the afk timer ended.
 	}
@@ -181,6 +95,9 @@
 			console.log("received id: " + data.id_num);
 			document.getElementById("myID").innerHTML= data.id_num;
 			currentID = data.id_num;
+			if (data.id_num == "full"){
+				window.location.href="/join?full=true&name=" + playerName;
+			}
 		}
 	});
 
@@ -203,8 +120,10 @@
 	
 	window.onbeforeunload = closingCode;
 	function closingCode(){
-		socket.emit("userDisconnected", {remove_id : currentID});
-		return null;
+		if (currentID !=0){
+			socket.emit("userDisconnected", {remove_id : currentID});
+			return null;
+		}
 	}
 
 	var canvas,

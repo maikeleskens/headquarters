@@ -1,33 +1,84 @@
-<h1>Select your ingame name!</h1>
-<input type="text" id="nickname" onkeypress="return inputLimiter(event,'nickname')"size="20" maxlength="18" placeholder="Select your name" /><br>
-<button onClick ="startGame()">Play</button>
 
-<script type="text/javascript">
+<head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/shared.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
 
-function inputLimiter(e,allow) {
-    var AllowableCharacters = '';
+<body style="background-color:170d0d;">
+    <div style="width:500px; margin:0px auto;">
+        <h1 style="color:#ffffff;">Create your ingame name</h1>
+        <div class="popup">wahed</div>
+        <input type="text" id="nickname" onkeypress="return inputLimiter(event,'nickname')" maxlength="20" placeholder="Your name" /><br>
+        <button class="startGame" onClick ="startGame()">Play</button>
+    </div>
 
-    if (allow == 'nickname'){AllowableCharacters=' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_\'';}
+    <script type="text/javascript">
+    var prevChar = undefined;
 
-    var k = document.all?parseInt(e.keyCode): parseInt(e.which);
-    if (k!=13 && k!=8 && k!=0){
-        if ((e.ctrlKey==false) && (e.altKey==false)) {
-    	    return (AllowableCharacters.indexOf(String.fromCharCode(k))!=-1);
-        } else {
-        	return true;
+    window.onload = function(){
+        var checkIfIsFull = getParameterByName('full');
+        var myName = getParameterByName('name');
+        console.log(checkIfIsFull);
+        console.log(myName);
+        if (checkIfIsFull == 'true'){
+            $(".popup").empty();
+            $(".popup").append("The game is currently full of players, please try again later");
+            $(".popup").css({
+                "display" : "block"
+            })
+            document.getElementById("nickname").value = myName;
         }
-    } else {
+    }
+
+    function inputLimiter(e,allow) {
+        var AllowableCharacters = '';
+        if (allow == 'nickname' && prevChar !=32)
+        {
+            AllowableCharacters=' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_\'';
+        } else {
+            AllowableCharacters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_\'';
+        }
+        var k = document.all?parseInt(e.keyCode): parseInt(e.which);
+        
+        if (k!=13 && k!=8 && k!=0){
+            if ((e.ctrlKey==false) && (e.altKey==false)) {
+                prevChar = k;
+                return (AllowableCharacters.indexOf(String.fromCharCode(k))!=-1);
+
+            } else {
+             return true;
+         }
+     } else {
         return true;
     }
 } 
 
 function startGame(){
 	var n = document.getElementById("nickname").value;
-	var _n = {playerName: n};
-	_n = JSON.stringify(_n);
-	localStorage.setItem('_n', _n);
+    var nCount = n.split('').length;
 
-	console.log(_n);
-	window.location.href = "/play";
+    if (nCount>3){
+       var _n = {playerName: n};
+       _n = JSON.stringify(_n);
+       localStorage.setItem('_n', _n);
+       console.log(_n);
+       window.location.href = "/play";
+   }
+   else {
+        $(".popup").empty();
+        $(".popup").append("Your name requires at least 3 characters");
+        $(".popup").css({
+            "display" : "block"
+        })
+   }
+	//
+}
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 </script>
+</body>

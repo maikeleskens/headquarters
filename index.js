@@ -86,6 +86,8 @@ io.on('connection', function(socket){
 		while(i==devices[i]){
 			i++;
 		}
+
+		if (i < maxUsers){
 		devices[i] = i;
 		var id = devices[i];
 		playerNames[id] = data.playerName;
@@ -109,6 +111,9 @@ io.on('connection', function(socket){
 			devices[6] + playerNames[6] + ", " + devices[7] + playerNames[7] + ", " +
 			devices[8] + playerNames[8] 
 		);
+		} else {
+			socket.emit("receiveID", {id_num: "full"});
+		}
 	})
 
 	socket.on("requestAllCurrentData", function(){
