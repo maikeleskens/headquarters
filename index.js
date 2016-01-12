@@ -50,21 +50,21 @@ var playerColors = [
 var maxUsers = 12;
 var startAtUser = 1;
 
-var standardSpeedMultiplier = 20;
+var standardSpeedMultiplier = 12;
 var speedMultipliers = [];
-var boostSpeed = 120;
+var boostSpeed = 70;
 
 
 for (var i=startAtUser; i<maxUsers+1; i++){
-	devices.push(0);
-	xpositions.push(0);
-	ypositions.push(0);
-	prev_xpositions.push(0);
-	prev_ypositions.push(0);
-	moveToX.push(0);
-	moveToY.push(0);
-	playerBoosting.push(false);
-	speedMultipliers.push(standardSpeedMultiplier)
+	devices[i] = 0;
+	xpositions[i] = 9000;
+	ypositions[i] = 9000;
+	prev_xpositions[i] = 9000;
+	prev_ypositions[i] = 9000;
+	moveToX[i] = 9000;
+	moveToY[i] = 9000;
+	playerBoosting[i] = false;
+	speedMultipliers[i] = standardSpeedMultiplier;
 }
 
 
@@ -91,8 +91,10 @@ io.on('connection', function(socket){
 		devices[i] = i;
 		var id = devices[i];
 		playerNames[id] = data.playerName;
-		xpositions[id] = parseFloat(data.startX);
-		ypositions[id] = parseFloat(data.startY);
+		xpositions[id] = parseInt(data.startX);
+		ypositions[id] = parseInt(data.startY);
+		moveToX[id] = parseInt(data.startX);
+		moveToY[id] = parseInt(data.startY);
 		//var id=1;
 
 		//socket.emit("receiveID", id);
@@ -104,6 +106,8 @@ io.on('connection', function(socket){
 			_playerName: playerNames[id],
 			_playerColor: playerColors[id]
 		});
+
+		sendAllData();
 
 		console.log(devices[1] + playerNames[1] + ", " +
 			devices[2] + playerNames[2] + ", " + devices[3] + playerNames[3] + ", " +
@@ -169,8 +173,10 @@ io.on('connection', function(socket){
     socket.on('userDisconnected', function(data){
     	var remove_id = parseInt(data.remove_id);
     	devices[remove_id] =0;
-    	xpositions[remove_id] = 0;
-    	ypositions[remove_id] = 0;
+    	xpositions[remove_id] = screenwidth+9000;
+		ypositions[remove_id] = 100;
+		moveToX[remove_id] = screenwidth+9000;
+		moveToY[remove_id] = 100;
     	playerNames[remove_id] = "";
     	sendAllData();
     	console.log("user "+ data.remove_id + " left");
@@ -191,7 +197,7 @@ function serversideMove(){
 		 	//moveToY[i] = ypositions[i];
 		 }
 
-		 if (moveToX[i] > screenwidth){
+		 if (moveToX[i] > screenwidth && moveToX[i]<screenwidth+750){
 		 	xpositions[i] = 0;
 		 	moveToX[i] = 0;
 		 	resetPosition(i);
@@ -222,10 +228,10 @@ function serversideMove(){
 				if (distX < 50 && distX > -50 && distY < 50 && distY > -50 && i != j){
 					console.log("player " + i + " killed " + j);
 					//temp move yposition of the players thats been hit
-					xpositions[j] = 70;
-					ypositions[j] = 70;
-					moveToX[j] = 70;
-					moveToY[j] = 70;
+					xpositions[j] = screenwidth+9000;
+					ypositions[j] = 100;
+					moveToX[j] = screenwidth+9000;
+					moveToY[j] = 100;
 					io.sockets.emit("playerKilled", {
 						id_num : j,
 						x : xpositions[j],
@@ -233,6 +239,7 @@ function serversideMove(){
 						killedBy : i
 					})
 					console.log("x: " + xpositions[j] + ", y: " + ypositions[j]);
+					respawnPlayer(j);
 				}
 			}
 		}
@@ -240,6 +247,21 @@ function serversideMove(){
 	setTimeout(function(){
 		serversideMove();
 	},2)
+}
+
+function respawnPlayer(id){
+	setTimeout(function(){
+		xpositions[id] = 200;
+		ypositions[id] =200;
+		moveToX[id] = 200;
+		moveToY[id] =200;
+
+		io.sockets.emit("resetposition", {
+			id_num : id,
+			x : xpositions[id],
+			y : ypositions[id]
+		})
+	},3000)
 }
 
 function resetPosition(id){
@@ -258,8 +280,8 @@ function checkIfAfk(){
 				console.log("user " + i + " needs to be removed");
 				io.sockets.emit("removeMe", {id:i});
 				devices[i] =0;
-    			xpositions[i] = 0;
-    			ypositions[i] = 0;
+    			xpositions[i] = 50;
+    			ypositions[i] = 100;
     			playerNames[i] = "";
     			console.log("user "+ i + " kicked for afk");
     			sendAllData();

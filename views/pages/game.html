@@ -154,21 +154,14 @@ for (var i = startAtUser; i<maxUsers; i++){
 	socket.on('resetposition', function(data){
 		console.log("resetted");
 		var i = parseInt(data.id_num);
-		xpositions[i] = parseFloat(data.x)*relativeToScreen;
-		ypositions[i] = parseFloat(data.y)*relativeToScreen;
-
-		xtargets[i] = parseFloat(data.x)*relativeToScreen;
-		ytargets[i] = parseFloat(data.y)*relativeToScreen;
+		repositionPlayer(i, data);
 	})
+
 
 	socket.on('playerKilled', function(data){
 		var i = parseInt(data.id_num);
 		var killedBy = parseInt(data.killedBy);
-		xpositions[i] = parseFloat(data.x)*relativeToScreen;
-		ypositions[i] = parseFloat(data.y)*relativeToScreen;
-
-		xtargets[i] = parseFloat(data.x)*relativeToScreen;
-		ytargets[i] = parseFloat(data.y)*relativeToScreen;
+		repositionPlayer(i, data);
 		gameLog.push("<b><span style='color:" +colors[i] + "'>" + names[i] +
 			"</span> </b>was killed by <b><span style='color:" + colors[killedBy] + "'>" + names[killedBy] + "</span></b>");
 		if (gameLog.length > 5){
@@ -243,6 +236,14 @@ for (var i = startAtUser; i<maxUsers; i++){
 		updatePosition();
 		requestAnimationFrame(update);
 
+	}
+
+	function repositionPlayer(_i, _data){
+		xpositions[_i] = parseFloat(_data.x)*relativeToScreen;
+		ypositions[_i] = parseFloat(_data.y)*relativeToScreen;
+
+		xtargets[_i] = parseFloat(_data.x)*relativeToScreen;
+		ytargets[_i] = parseFloat(_data.y)*relativeToScreen;
 	}
 
 	function updatePlayerList(){

@@ -56,6 +56,9 @@
 	var newX = 0;
 	var newY = 0;
 
+	var prevX = 0;
+	var prevY = 0;
+
 	var buttonW = 0;
 	var buttonH =0;
 
@@ -64,6 +67,14 @@
 	window.onload = function(){
 		buttonW = $("#boostButton").width();
 		buttonH = $("#boostButton").height();
+
+		newX = Math.floor((Math.random() * 800) + 100);
+		newY = Math.floor((Math.random() * 600) + 100);
+		prevX = newX;
+		prevY = newY;
+
+		console.log(newX);
+
 
 
 		var _n = localStorage.getItem('_n');
@@ -80,8 +91,8 @@
 		if (playerName != undefined && playerName != ""){
 			socket.emit("requestID", {
 				playerName: playerName,
-				startX: 100,
-				startY: 100
+				startX: newX,
+				startY: newY
 			});
 		} else {
 			window.location.href = "/join";
@@ -136,7 +147,7 @@
  	leftTouchStartPos = new Vector2(0,0),
  	leftVector = new Vector2(0,0);
 
- 	var maxDragRange = 20;
+ 	var maxDragRange = 50;
  	var timer =0
  	var canBoost = true;
 
@@ -196,9 +207,25 @@ if(window.innerHeight > window.innerWidth){
 			
 			if(touch.identifier == leftTouchID){
 				//Show data on touch
+				//var tempX = MinMax(parseInt(leftTouchPos.x) - parseInt(leftTouchStartPos.x), -maxDragRange, maxDragRange)/maxDragRange; 
+				//var tempY = MinMax(parseInt(leftTouchPos.y) - parseInt(leftTouchStartPos.y), -maxDragRange, maxDragRange)/maxDragRange;
+				var _x = leftTouchPos.x - leftTouchStartPos.x;
+				var _y = leftTouchPos.y - leftTouchStartPos.y;
+
+
+				var dist = MinMax(Math.sqrt( (leftTouchPos.x-leftTouchStartPos.x)*(leftTouchPos.x-leftTouchStartPos.x) +
+					(leftTouchPos.y-leftTouchStartPos.y)*(leftTouchPos.y-leftTouchStartPos.y)), 0, maxDragRange)/maxDragRange;
+
+ 				var angle = Math.atan2( leftTouchPos.y - leftTouchStartPos.y,
+					leftTouchPos.x - leftTouchStartPos.x);
+				//var totalDist = tempX + tempY;
+				newX = 1* Math.cos(angle)*dist;
+				newY = 1* Math.sin(angle)*dist;
+
 				c.beginPath();
 				c.fillStyle = "#ffffff";
-				c.fillText("touch id : "+touch.identifier+" x:"+touch.clientX+" y:"+touch.clientY, touch.clientX+30, touch.clientY-30);
+				c.fillText("touch id : "+touch.identifier+" x:"+newX+" y:"+newY + " angle:"+angle, touch.clientX+30, touch.clientY-30);
+				//c.fillText(" distance:"+dist, touch.clientX+30, touch.clientY-30);
 				//Innercircle
 				c.beginPath(); 
 				c.strokeStyle = "#bebebe"; 
@@ -219,10 +246,7 @@ if(window.innerHeight > window.innerWidth){
 				c.fill();
 				
 
-				newX = MinMax(parseInt(leftTouchPos.x) - parseInt(leftTouchStartPos.x), -maxDragRange, maxDragRange)/maxDragRange; 
-				newY = MinMax(parseInt(leftTouchPos.y) - parseInt(leftTouchStartPos.y), -maxDragRange, maxDragRange)/maxDragRange;
-
-
+				
 
 				//THIS SHIT MADE THE APP SO DAMN SLOW
 				// document.getElementById("showpositions").innerHTML= "Touch ID: " + leftTouchID + ", Start X: " + parseInt(leftTouchStartPos.x) + ", Start Y: " + parseInt(leftTouchStartPos.y) + ", Current X: " + parseInt(leftTouchPos.x) + ", Current Y: " + parseInt(leftTouchPos.y) + ", --- Speed X: " + newX + ", Speed Y: " + newY; 
@@ -251,7 +275,7 @@ if(window.innerHeight > window.innerWidth){
 	}
 	//c.fillText("hello", 0,0); 
 	timer++;
-		if (timer >2 && newX!=0 && newY !=0){
+		if (timer> 0 && newX!=0 && newY !=0){
 			socket.emit("dataTransfer", {
 				id_num : currentID,
 				x : newX,
@@ -264,26 +288,7 @@ if(window.innerHeight > window.innerWidth){
 	}
 }
 }
-/*	
- *	Touch event (e) properties : 
- *	e.touches: 			Array of touch objects for every finger currently touching the screen
- *	e.targetTouches: 	Array of touch objects for every finger touching the screen that
- *						originally touched down on the DOM object the transmitted the event.
- *	e.changedTouches	Array of touch objects for touches that are changed for this event. 					
- *						I'm not sure if this would ever be a list of more than one, but would 
- *						be bad to assume. 
- *
- *	Touch objects : 
- *
- *	identifier: An identifying number, unique to each touch event
- *	target: DOM object that broadcast the event
- *	clientX: X coordinate of touch relative to the viewport (excludes scroll offset)
- *	clientY: Y coordinate of touch relative to the viewport (excludes scroll offset)
- *	screenX: Relative to the screen
- *	screenY: Relative to the screen
- *	pageX: Relative to the full page (includes scrolling)
- *	pageY: Relative to the full page (includes scrolling)
- */	
+
  function onTouchStart(e) {
 
  	for(var i = 0; i<e.changedTouches.length; i++){
