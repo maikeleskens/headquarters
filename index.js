@@ -39,6 +39,8 @@ var moveToY = [];
 var prev_xpositions = [];
 var prev_ypositions = [];
 var playerBoosting = [];
+var scores = [];
+var immunePlayer = [];
 
 var easing = 0.1;
 
@@ -63,7 +65,9 @@ for (var i=startAtUser; i<maxUsers+1; i++){
 	prev_ypositions[i] = 9000;
 	moveToX[i] = 9000;
 	moveToY[i] = 9000;
+	scores[i] = 0;
 	playerBoosting[i] = false;
+	immunePlayer[i] = false;
 	speedMultipliers[i] = standardSpeedMultiplier;
 }
 
@@ -177,6 +181,7 @@ io.on('connection', function(socket){
 		ypositions[remove_id] = 100;
 		moveToX[remove_id] = screenwidth+9000;
 		moveToY[remove_id] = 100;
+		scores[remove_id] = 0;
     	playerNames[remove_id] = "";
     	sendAllData();
     	console.log("user "+ data.remove_id + " left");
@@ -225,18 +230,21 @@ function serversideMove(){
 			for (var j = startAtUser; j<maxUsers; j++){
 				var distX = moveToX[i] - moveToX[j];
 				var distY = moveToY[i] - moveToY[j];
-				if (distX < 50 && distX > -50 && distY < 50 && distY > -50 && i != j){
+				if (distX < 50 && distX > -50 && distY < 50 && distY > -50 && i != j && immunePlayer[j] == false){
 					console.log("player " + i + " killed " + j);
 					//temp move yposition of the players thats been hit
 					xpositions[j] = screenwidth+9000;
 					ypositions[j] = 100;
 					moveToX[j] = screenwidth+9000;
 					moveToY[j] = 100;
+					immunePlayer[j] = true;
+					scores[i] = scores[i] +10;
 					io.sockets.emit("playerKilled", {
 						id_num : j,
 						x : xpositions[j],
 						y : ypositions[j],
-						killedBy : i
+						killedBy : i,
+						score : scores[i]
 					})
 					console.log("x: " + xpositions[j] + ", y: " + ypositions[j]);
 					respawnPlayer(j);
@@ -261,6 +269,9 @@ function respawnPlayer(id){
 			x : xpositions[id],
 			y : ypositions[id]
 		})
+		setTimeout(function(){
+			immunePlayer[id] = false;
+		},3000)
 	},3000)
 }
 
@@ -282,6 +293,7 @@ function checkIfAfk(){
 				devices[i] =0;
     			xpositions[i] = 50;
     			ypositions[i] = 100;
+    			scores[i] = 0;
     			playerNames[i] = "";
     			console.log("user "+ i + " kicked for afk");
     			sendAllData();
@@ -304,7 +316,8 @@ function checkIfAfk(){
 			playerColor: playerColors,
 			x : xpositions,
 			y : ypositions,
-			easing : easing
+			easing : easing,
+			allScores :scores
 		});
 		console.log("data send");
 	}

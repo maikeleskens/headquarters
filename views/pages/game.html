@@ -25,10 +25,13 @@
 	var ytargets = [];
 	var xpositions = [];
 	var ypositions = [];
+	var prev_xpositions = [];
+	var prev_ypositions = [];
 	var names = [];
+	var immunePlayer = [];
 	var colors = [];
 	//TEMP SCORES
-	var scores = [100,140,200,30,20,0,0,10,200,50,70,60];
+	var scores = [];
 
 	var gameLog = [];
 	var isCharging = [];
@@ -49,6 +52,8 @@ for (var i = startAtUser; i<maxUsers; i++){
 			xpositions[i] = 0.0;
 			ypositions[i] = 0.0;
 			isCharging[i] = false;
+			scores[i] = 0;
+			immunePlayer[i] = false;
 		}
 
 	window.onload = function(){
@@ -63,6 +68,8 @@ for (var i = startAtUser; i<maxUsers; i++){
 			
 	//ctx.fillRect(xpos,ypos,10,10);
 		init();
+
+		
 	}
 
 	function fullscreen() {
@@ -71,6 +78,7 @@ for (var i = startAtUser; i<maxUsers; i++){
 	function init(){
 		update();
 		updatePlayerList();
+		
 		socket.emit("requestAllCurrentData");
 	}
 
@@ -110,9 +118,11 @@ for (var i = startAtUser; i<maxUsers; i++){
 
 		xtargets[i] = parseFloat(data.x[i]) *relativeToScreen;
 		ytargets[i] = parseFloat(data.y[i]) *relativeToScreen;
+		scores[i] = parseInt(data.allScores[i]);
 
 		names[i] = data.playerName[i];
 		colors[i] = data.playerColor[i];
+		
 
 		easing = parseFloat(data.easing);
 
@@ -160,8 +170,14 @@ for (var i = startAtUser; i<maxUsers; i++){
 
 	socket.on('playerKilled', function(data){
 		var i = parseInt(data.id_num);
+		immunePlayer[i] = true;
+		for (var e = 0; e<10; e ++){
+			explosionInit(xpositions[i], ypositions[i], colors[i]);
+		}
 		var killedBy = parseInt(data.killedBy);
+		scores[killedBy] = parseInt(data.score);
 		repositionPlayer(i, data);
+		
 		gameLog.push("<b><span style='color:" +colors[i] + "'>" + names[i] +
 			"</span> </b>was killed by <b><span style='color:" + colors[killedBy] + "'>" + names[killedBy] + "</span></b>");
 		if (gameLog.length > 5){
@@ -172,6 +188,10 @@ for (var i = startAtUser; i<maxUsers; i++){
 		for (var g = 0; g<gameLog.length; g++){
 			$('#gamelog').append(gameLog[g] + "<br>");
 		}
+
+		setTimeout(function(){
+			immunePlayer[i] = false;
+		},6000)
 
 	})
 
@@ -212,7 +232,12 @@ for (var i = startAtUser; i<maxUsers; i++){
 			
 			//ctx.translate(10,10);
 
+			//if (isCharging[i] == false){
+			//}
+
 			if (isCharging[i] == true){
+      			
+
 				ctx.fillStyle = 'blue';
 				ctx.arc(xpositions[i], ypositions[i],playerSize*1.5,0,2*Math.PI);
 				ctx.fill();
@@ -220,24 +245,70 @@ for (var i = startAtUser; i<maxUsers; i++){
 			ctx.fillStyle = colors[i];
 			ctx.arc(xpositions[i], ypositions[i],playerSize,0,2*Math.PI);
 			ctx.fill();
+
+			if (immunePlayer[i] == true){
+				ctx.lineWidth = 3;
+      			ctx.strokeStyle = '#363636';
+     			ctx.stroke();
+			}
 			//ctx.fillRect(xpositions[i]-(playerSize/2),ypositions[i]-(playerSize/2),playerSize,playerSize);
 
 			ctx.beginPath();
 			ctx.fillText(names[i] ,xpositions[i],ypositions[i]-10);
+
+			
+			
 		}
 	}
 	function clearCanvas() {
     	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    	ctx.globalAlpha=1.0;
 	}
 
 	function update(){
 
 		//console.log("wahed");
 		updatePosition();
+
 		requestAnimationFrame(update);
 
 	}
 
+	function explosionInit(_x,_y, _col){
+		var x =_x;
+		var y =_y;
+		var col = _col;
+		var lifetime = 30;
+		var spread= 200;
+
+		var size= Math.floor((Math.random() * 5) + 15)/10;
+		var toX = x+ (Math.random()*spread)-spread/2;
+		var toY = y+ (Math.random()*spread)-spread/2;
+
+		explosionUpdate();
+
+		function explosionUpdate(){
+			//x=x+velX;
+			//y=y+velY;
+			var dx = toX - x;
+			var dy = toY - y;
+			x = x+dx*0.15;
+			y = y+dy*0.15;
+			lifetime--;
+			ctx.beginPath();
+			ctx.globalAlpha=lifetime/30;
+			ctx.fillStyle = col;
+			ctx.arc(x, y,size,0,2*Math.PI);
+			ctx.fill();
+
+			if (lifetime>0){
+				requestAnimationFrame(explosionUpdate);
+			}
+		}
+
+	}
+
+	
 	function repositionPlayer(_i, _data){
 		xpositions[_i] = parseFloat(_data.x)*relativeToScreen;
 		ypositions[_i] = parseFloat(_data.y)*relativeToScreen;
